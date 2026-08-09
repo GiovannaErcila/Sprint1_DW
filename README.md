@@ -41,7 +41,7 @@ de calidad con buena relación precio-rendimiento, envío rápido y soporte conf
 ├── perfil.html
 ├── admin.html
 ├── css/
-│   └── styles.css
+│   └── estilos.css
 ├── js/
 │   ├── modules/
 │   └── pages/
