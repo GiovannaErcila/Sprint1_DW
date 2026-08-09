@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ByteNova · Tecnología para tu día a día</title>
+   
+  <meta name="description" content="ByteNova, tu tienda de tecnología: notebooks, smartphones, auriculares, gaming y accesorios con envío rápido y garantía extendida.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="navbar navbar-expand-lg navbar-bytenova sticky-top" aria-label="Navegación principal">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Byte<span>Nova</span></a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarNav" aria-controls="navbarNav"
+              aria-expanded="false" aria-label="Abrir o cerrar menú de navegación">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="catalogo.html">Catálogo</a></li>
+          <li class="nav-item"><a class="nav-link" href="producto.html">Producto</a></li>
+          <li class="nav-item"><a class="nav-link" href="carrito.html">Carrito</a></li>
+          <li class="nav-item"><a class="nav-link" href="perfil.html">Mi perfil</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin.html">Administración</a></li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" class="btn btn-login" data-bs-toggle="modal" data-bs-target="#modalLoginAviso">
+            Iniciar sesión
+          </button>
+          <a href="carrito.html" class="cart-indicator" aria-label="Ver carrito de compras">
+            🛒 <span class="badge rounded-pill">0</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero-bytenova">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <span class="hero-badge">🚀 Nueva colección tecnológica</span>
+          <h1>Tecnología que impulsa tu día a día</h1>
+          <p class="lead my-4">
+            En ByteNova encontrás notebooks, smartphones, auriculares y accesorios
+            gamer seleccionados por calidad y rendimiento, con envío rápido a todo el país.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="catalogo.html" class="btn btn-bn-primary">Ver catálogo</a>
+            <a href="#beneficios" class="btn btn-bn-outline">Conocer beneficios</a>
+          </div>
+        </div>
+        <div class="col-lg-6 hero-img-wrapper">
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80"
+               class="img-fluid" alt="Notebook y accesorios tecnológicos sobre un escritorio">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== PRODUCTOS DESTACADOS ===================== -->
+  <section class="py-5" id="destacados">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">Productos destacados</h2>
+        <p class="section-subtitle">Una selección de lo más elegido por nuestros clientes esta temporada.</p>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Producto 1 -->
+        <div class="col-6 col-md-4 col-lg-4">
+          <div class="product-card card">
+            <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&q=80"
+                 alt="Notebook ultraliviana color plateado abierta">
+            <div class="card-body">
+              <span class="product-category">Notebooks</span>
+              <h3 class="h6 mt-1">NovaBook Air 14"</h3>
+              <p class="text-muted small mb-2">Liviana, silenciosa y con batería de larga duración para el día a día.</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="product-price">USD 649</span>
+                <span class="badge bg-success-subtle text-success stock-badge">En stock</span>
+              </div>
+              <a href="producto.html" class="btn btn-bn-card w-100 mt-3">Ver producto</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Producto 2 -->
+        <div class="col-6 col-md-4 col-lg-4">
+          <div class="product-card card">
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80"
+                 alt="Smartphone de pantalla grande con cámara triple">
+            <div class="card-body">
+              <span class="product-category">Smartphones</span>
+              <h3 class="h6 mt-1">Nova Phone X12</h3>
+              <p class="text-muted small mb-2">Pantalla AMOLED, cámara triple y carga rápida en un diseño compacto.</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="product-price">USD 399</span>
+                <span class="badge bg-success-subtle text-success stock-badge">En stock</span>
+              </div>
+              <a href="producto.html" class="btn btn-bn-card w-100 mt-3">Ver producto</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Producto 3 -->
+        <div class="col-6 col-md-4 col-lg-4">
+          <div class="product-card card">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80"
+                 alt="Auriculares inalámbricos negros sobre fondo claro">
+            <div class="card-body">
+              <span class="product-category">Auriculares</span>
+              <h3 class="h6 mt-1">NovaSound Pro</h3>
+              <p class="text-muted small mb-2">Cancelación de ruido activa y hasta 30 horas de batería.</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="product-price">USD 89</span>
+                <span class="badge bg-success-subtle text-success stock-badge">En stock</span>
+              </div>
+              <a href="producto.html" class="btn btn-bn-card w-100 mt-3">Ver producto</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Producto 4 -->
+        <div class="col-6 col-md-4 col-lg-4">
+          <div class="product-card card">
+            <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=500&q=80"
+                 alt="Teclado y mouse gamer con iluminación RGB">
+            <div class="card-body">
+              <span class="product-category">Gaming</span>
+              <h3 class="h6 mt-1">Combo Gamer RGB</h3>
+              <p class="text-muted small mb-2">Teclado mecánico y mouse de alta precisión con iluminación RGB.</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="product-price">USD 79</span>
+                <span class="badge bg-warning-subtle text-warning stock-badge">Últimas unidades</span>
+              </div>
+              <a href="producto.html" class="btn btn-bn-card w-100 mt-3">Ver producto</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Producto 5 -->
+        <div class="col-6 col-md-4 col-lg-4">
+          <div class="product-card card">
+            <img src="https://images.unsplash.com/photo-1591370874773-6702e8f12fd8?auto=format&fit=crop&w=500&q=80"
+                 alt="Smartwatch deportivo con correa negra">
+            <div class="card-body">
+              <span class="product-category">Accesorios</span>
+              <h3 class="h6 mt-1">Nova Watch Fit</h3>
+              <p class="text-muted small mb-2">Monitoreo de actividad física, notificaciones y batería de 10 días.</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="product-price">USD 59</span>
+                <span class="badge bg-success-subtle text-success stock-badge">En stock</span>
+              </div>
+              <a href="producto.html" class="btn btn-bn-card w-100 mt-3">Ver producto</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Producto 6 -->
+        <div class="col-6 col-md-4 col-lg-4">
+          <div class="product-card card">
+            <img src="https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=500&q=80"
+                 alt="Disco sólido externo y componentes de PC">
+            <div class="card-body">
+              <span class="product-category">Componentes</span>
+              <h3 class="h6 mt-1">SSD NovaSpeed 1TB</h3>
+              <p class="text-muted small mb-2">Almacenamiento externo ultrarrápido, compacto y resistente.</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <span class="product-price">USD 95</span>
+                <span class="badge bg-success-subtle text-success stock-badge">En stock</span>
+              </div>
+              <a href="producto.html" class="btn btn-bn-card w-100 mt-3">Ver producto</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BENEFICIOS ===================== -->
+  <section class="py-5 bg-white" id="beneficios">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">Por qué elegir ByteNova</h2>
+        <p class="section-subtitle">Comprar tecnología también debería ser una buena experiencia.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon">🚚</div>
+            <h3 class="h6">Envío rápido</h3>
+            <p class="text-muted small mb-0">Recibí tu pedido en todo el país en pocos días hábiles.</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon">🛡️</div>
+            <h3 class="h6">Garantía extendida</h3>
+            <p class="text-muted small mb-0">Todos los productos cuentan con garantía oficial.</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon">💬</div>
+            <h3 class="h6">Soporte técnico</h3>
+            <p class="text-muted small mb-0">Asistencia personalizada antes y después de tu compra.</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon">↩️</div>
+            <h3 class="h6">Cambios y devoluciones</h3>
+            <p class="text-muted small mb-0">Tenés 30 días para cambiar tu producto sin complicaciones.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer-bytenova">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <h5>ByteNova</h5>
+          <p class="small">Tienda de tecnología dedicada a acercarte los mejores productos con
+             calidad, garantía y atención cercana.</p>
+        </div>
+        <div class="col-md-4">
+          <h5>Enlaces</h5>
+          <ul class="list-unstyled small">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="catalogo.html">Catálogo</a></li>
+            <li><a href="carrito.html">Carrito</a></li>
+            <li><a href="perfil.html">Mi perfil</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h5>Contacto</h5>
+          <p class="small mb-1">contacto@bytenova.com</p>
+          <p class="small">Fray Bentos, Uruguay</p>
+          <div class="mt-2">
+            <a href="#" class="social-icon" aria-label="Instagram (simulado)">IG</a>
+            <a href="#" class="social-icon" aria-label="Facebook (simulado)">FB</a>
+            <a href="#" class="social-icon" aria-label="X (simulado)">X</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        © 2026 ByteNova · Proyecto académico de Desarrollo Web
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== MODAL AVISO LOGIN ===================== -->
+  <div class="modal fade" id="modalLoginAviso" tabindex="-1" aria-labelledby="modalLoginAvisoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modalLoginAvisoLabel">Funcionalidad en desarrollo</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          El inicio de sesión con Firebase Authentication estará disponible en el <strong>Sprint 3</strong>.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-bn-primary" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
