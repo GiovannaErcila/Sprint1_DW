@@ -1,0 +1,224 @@
+// catalogo.js
+// Cada bloque de abajo corresponde a un día del plan. Cada día:
+// 1) Sacá el /* y el */ que envuelven el bloque de HOY (dejalo activo).
+// 2) Guardá, probá con Live Server.
+// 3) Si anda bien, commit con el mensaje indicado.
+// No toques bloques de días futuros todavía.
+
+// ============================================================
+// DÍA 1 (30/8) — HOY. Verificamos que productos.js cargó bien.
+// Commit: "Agrega array de productos con datos base"
+// ============================================================
+console.log("Productos cargados:", productos.length, productos);
+
+
+// ============================================================
+// DÍA 2 (31/8) — Descomentar: catálogo dinámico básico (solo nombre e imagen)
+// Commit: "Genera catálogo dinámico desde JavaScript"
+// ============================================================
+/*
+const contenedorCatalogo = document.getElementById("catalogo");
+
+function crearTarjetaProducto(producto) {
+  const tarjeta = document.createElement("div");
+  tarjeta.classList.add("col-md-4", "mb-4");
+  tarjeta.innerHTML = `
+    <div class="card h-100">
+      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
+      <div class="card-body">
+        <h5 class="card-title">${producto.nombre}</h5>
+      </div>
+    </div>
+  `;
+  return tarjeta;
+}
+
+function renderizarCatalogo(lista) {
+  contenedorCatalogo.innerHTML = "";
+  lista.forEach((producto) => {
+    contenedorCatalogo.appendChild(crearTarjetaProducto(producto));
+  });
+}
+
+renderizarCatalogo(productos);
+*/
+
+
+// ============================================================
+// DÍA 3 (1/9) — Reemplaza crearTarjetaProducto: agrega categoría, precio y stock
+// (Cuando lo actives, BORRÁ la versión de crearTarjetaProducto del Día 2 de arriba,
+//  para no tener la función declarada dos veces con distinto contenido)
+// Commit: "Muestra categoría, precio y stock en las tarjetas"
+// ============================================================
+/*
+function crearTarjetaProducto(producto) {
+  const tarjeta = document.createElement("div");
+  tarjeta.classList.add("col-md-4", "mb-4");
+  tarjeta.innerHTML = `
+    <div class="card h-100">
+      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">${producto.nombre}</h5>
+        <p class="card-text text-muted mb-1">${producto.categoria}</p>
+        <p class="card-text fw-bold">$${producto.precio.toLocaleString("es-UY")}</p>
+        <p class="card-text"><small>Stock: ${producto.stock}</small></p>
+      </div>
+    </div>
+  `;
+  return tarjeta;
+}
+*/
+
+
+// ============================================================
+// DÍA 4 (2/9) — Buscador por nombre
+// Commit: "Implementa búsqueda de productos por nombre"
+// ============================================================
+/*
+const inputBusqueda = document.getElementById("buscador");
+
+function aplicarFiltros() {
+  const texto = inputBusqueda.value.trim().toLowerCase();
+  const resultado = productos.filter((p) => p.nombre.toLowerCase().includes(texto));
+  renderizarCatalogo(resultado);
+}
+
+inputBusqueda.addEventListener("input", aplicarFiltros);
+*/
+
+
+// ============================================================
+// DÍA 5 (3/9) — Filtro por categoría (reemplaza aplicarFiltros del Día 4)
+// Commit: "Agrega filtro de productos por categoría"
+// ============================================================
+/*
+const selectCategoria = document.getElementById("filtro-categoria");
+
+function cargarCategorias() {
+  const categorias = [...new Set(productos.map((p) => p.categoria))];
+  categorias.forEach((categoria) => {
+    const opcion = document.createElement("option");
+    opcion.value = categoria;
+    opcion.textContent = categoria;
+    selectCategoria.appendChild(opcion);
+  });
+}
+
+function aplicarFiltros() {
+  const texto = inputBusqueda.value.trim().toLowerCase();
+  const categoria = selectCategoria.value;
+  const resultado = productos.filter((p) => {
+    const coincideTexto = p.nombre.toLowerCase().includes(texto);
+    const coincideCategoria = categoria === "" || p.categoria === categoria;
+    return coincideTexto && coincideCategoria;
+  });
+  renderizarCatalogo(resultado);
+}
+
+cargarCategorias();
+selectCategoria.addEventListener("change", aplicarFiltros);
+*/
+
+
+// ============================================================
+// DÍA 6 (4/9) — Reemplaza renderizarCatalogo: mensaje "sin resultados"
+// (Borrá la versión de renderizarCatalogo del Día 2 cuando actives esta)
+// Commit: "Combina búsqueda y filtro, agrega mensaje sin resultados"
+// ============================================================
+/*
+const mensajeSinResultados = document.getElementById("sin-resultados");
+
+function renderizarCatalogo(lista) {
+  contenedorCatalogo.innerHTML = "";
+  if (lista.length === 0) {
+    mensajeSinResultados.classList.remove("d-none");
+    return;
+  }
+  mensajeSinResultados.classList.add("d-none");
+  lista.forEach((producto) => {
+    contenedorCatalogo.appendChild(crearTarjetaProducto(producto));
+  });
+}
+*/
+
+
+// ============================================================
+// DÍA 7 (5/9) — Botón limpiar filtros
+// Commit: "Agrega botón limpiar filtros y ajustes finales del catálogo"
+// ============================================================
+/*
+const btnLimpiar = document.getElementById("limpiar-filtros");
+
+function limpiarFiltros() {
+  inputBusqueda.value = "";
+  selectCategoria.value = "";
+  renderizarCatalogo(productos);
+}
+
+btnLimpiar.addEventListener("click", limpiarFiltros);
+*/
+
+
+// ============================================================
+// DÍA 8 (6/9) — Reemplaza crearTarjetaProducto: agrega el enlace "Ver detalle"
+// (Borrá la versión del Día 3 cuando actives esta. producto.html todavía puede
+//  seguir en desarrollo, el enlace ya funciona igual)
+// Commit: "Enlaza tarjetas del catálogo al detalle de producto"
+// ============================================================
+/*
+function crearTarjetaProducto(producto) {
+  const tarjeta = document.createElement("div");
+  tarjeta.classList.add("col-md-4", "mb-4");
+  tarjeta.innerHTML = `
+    <div class="card h-100">
+      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">${producto.nombre}</h5>
+        <p class="card-text text-muted mb-1">${producto.categoria}</p>
+        <p class="card-text fw-bold">$${producto.precio.toLocaleString("es-UY")}</p>
+        <p class="card-text"><small>Stock: ${producto.stock}</small></p>
+        <a href="producto.html?id=${producto.id}" class="btn btn-outline-primary btn-sm mt-auto">Ver detalle</a>
+      </div>
+    </div>
+  `;
+  return tarjeta;
+}
+*/
+
+
+// ============================================================
+// DÍA 11 (9/9) — Reemplaza crearTarjetaProducto: agrega botón "Agregar al carrito"
+// (Ese día también agregás <script src="js/carrito.js"></script> en catalogo.html,
+//  ANTES del script de catalogo.js, porque agregarAlCarrito vive ahí)
+// Commit: "Implementa agregar productos al carrito con LocalStorage"
+// ============================================================
+/*
+function crearTarjetaProducto(producto) {
+  const tarjeta = document.createElement("div");
+  tarjeta.classList.add("col-md-4", "mb-4");
+  tarjeta.innerHTML = `
+    <div class="card h-100">
+      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">${producto.nombre}</h5>
+        <p class="card-text text-muted mb-1">${producto.categoria}</p>
+        <p class="card-text fw-bold">$${producto.precio.toLocaleString("es-UY")}</p>
+        <p class="card-text"><small>Stock: ${producto.stock}</small></p>
+        <div class="mt-auto d-flex gap-2">
+          <a href="producto.html?id=${producto.id}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
+          <button class="btn btn-primary btn-sm" data-id="${producto.id}">Agregar</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const botonAgregar = tarjeta.querySelector("button[data-id]");
+  botonAgregar.addEventListener("click", () => {
+    agregarAlCarrito(producto.id, 1);
+    botonAgregar.textContent = "Agregado";
+    setTimeout(() => (botonAgregar.textContent = "Agregar"), 1000);
+  });
+
+  return tarjeta;
+}
+*/
