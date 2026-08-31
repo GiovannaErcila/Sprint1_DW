@@ -1,22 +1,9 @@
 // catalogo.js
-// Cada bloque de abajo corresponde a un día del plan. Cada día:
-// 1) Sacá el /* y el */ que envuelven el bloque de HOY (dejalo activo).
-// 2) Guardá, probá con Live Server.
-// 3) Si anda bien, commit con el mensaje indicado.
-// No toques bloques de días futuros todavía.
 
-// ============================================================
-// DÍA 1 (30/8) — HOY. Verificamos que productos.js cargó bien.
 // Commit: "Agrega array de productos con datos base"
-// ============================================================
 console.log("Productos cargados:", productos.length, productos);
 
-
-// ============================================================
-// DÍA 2 (31/8) — Descomentar: catálogo dinámico básico (solo nombre e imagen)
 // Commit: "Genera catálogo dinámico desde JavaScript"
-// ============================================================
-/*
 const contenedorCatalogo = document.getElementById("catalogo");
 
 function crearTarjetaProducto(producto) {
@@ -41,7 +28,7 @@ function renderizarCatalogo(lista) {
 }
 
 renderizarCatalogo(productos);
-*/
+
 
 
 // ============================================================
