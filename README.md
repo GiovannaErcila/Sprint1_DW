@@ -4,7 +4,7 @@
 ByteNova — tienda de comercio electrónico de tecnología.
 
 ## Nombre del estudiante
-Giovanna
+Giovanna Ercila.
 
 ## Descripción del e-commerce
 ByteNova es una tienda online especializada en la venta de productos tecnológicos:
