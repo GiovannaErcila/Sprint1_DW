@@ -6,19 +6,6 @@ console.log("Productos cargados:", productos.length, productos);
 // Commit: "Genera catálogo dinámico desde JavaScript"
 const contenedorCatalogo = document.getElementById("catalogo");
 
-function crearTarjetaProducto(producto) {
-  const tarjeta = document.createElement("div");
-  tarjeta.classList.add("col-md-4", "mb-4");
-  tarjeta.innerHTML = `
-    <div class="card h-100">
-      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
-      <div class="card-body">
-        <h5 class="card-title">${producto.nombre}</h5>
-      </div>
-    </div>
-  `;
-  return tarjeta;
-}
 
 function renderizarCatalogo(lista) {
   contenedorCatalogo.innerHTML = "";
@@ -30,14 +17,6 @@ function renderizarCatalogo(lista) {
 renderizarCatalogo(productos);
 
 
-
-// ============================================================
-// DÍA 3 (1/9) — Reemplaza crearTarjetaProducto: agrega categoría, precio y stock
-// (Cuando lo actives, BORRÁ la versión de crearTarjetaProducto del Día 2 de arriba,
-//  para no tener la función declarada dos veces con distinto contenido)
-// Commit: "Muestra categoría, precio y stock en las tarjetas"
-// ============================================================
-/*
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("div");
   tarjeta.classList.add("col-md-4", "mb-4");
@@ -54,14 +33,8 @@ function crearTarjetaProducto(producto) {
   `;
   return tarjeta;
 }
-*/
 
 
-// ============================================================
-// DÍA 4 (2/9) — Buscador por nombre
-// Commit: "Implementa búsqueda de productos por nombre"
-// ============================================================
-/*
 const inputBusqueda = document.getElementById("buscador");
 
 function aplicarFiltros() {
@@ -71,7 +44,7 @@ function aplicarFiltros() {
 }
 
 inputBusqueda.addEventListener("input", aplicarFiltros);
-*/
+
 
 
 // ============================================================
