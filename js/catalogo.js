@@ -46,12 +46,6 @@ function aplicarFiltros() {
 inputBusqueda.addEventListener("input", aplicarFiltros);
 
 
-
-// ============================================================
-// DÍA 5 (3/9) — Filtro por categoría (reemplaza aplicarFiltros del Día 4)
-// Commit: "Agrega filtro de productos por categoría"
-// ============================================================
-/*
 const selectCategoria = document.getElementById("filtro-categoria");
 
 function cargarCategorias() {
@@ -77,7 +71,7 @@ function aplicarFiltros() {
 
 cargarCategorias();
 selectCategoria.addEventListener("change", aplicarFiltros);
-*/
+
 
 
 // ============================================================
