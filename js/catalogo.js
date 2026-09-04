@@ -65,13 +65,6 @@ function renderizarCatalogo(lista) {
   });
 }
 
-
-
-// ============================================================
-// DÍA 7 (5/9) — Botón limpiar filtros
-// Commit: "Agrega botón limpiar filtros y ajustes finales del catálogo"
-// ============================================================
-/*
 const btnLimpiar = document.getElementById("limpiar-filtros");
 
 function limpiarFiltros() {
@@ -81,7 +74,6 @@ function limpiarFiltros() {
 }
 
 btnLimpiar.addEventListener("click", limpiarFiltros);
-*/
 
 
 // ============================================================
