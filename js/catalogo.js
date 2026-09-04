@@ -68,7 +68,7 @@ function limpiarFiltros() {
 }
 
 btnLimpiar.addEventListener("click", limpiarFiltros);
-
+renderizarCatalogo(productos);
 
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("div");
