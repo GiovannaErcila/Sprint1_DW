@@ -14,27 +14,6 @@ function renderizarCatalogo(lista) {
   });
 }
 
-renderizarCatalogo(productos);
-
-
-function crearTarjetaProducto(producto) {
-  const tarjeta = document.createElement("div");
-  tarjeta.classList.add("col-md-4", "mb-4");
-  tarjeta.innerHTML = `
-    <div class="card h-100">
-      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">${producto.nombre}</h5>
-        <p class="card-text text-muted mb-1">${producto.categoria}</p>
-        <p class="card-text fw-bold">$${producto.precio.toLocaleString("es-UY")}</p>
-        <p class="card-text"><small>Stock: ${producto.stock}</small></p>
-      </div>
-    </div>
-  `;
-  return tarjeta;
-}
-
-
 const inputBusqueda = document.getElementById("buscador");
 
 function aplicarFiltros() {
@@ -72,14 +51,6 @@ function aplicarFiltros() {
 cargarCategorias();
 selectCategoria.addEventListener("change", aplicarFiltros);
 
-
-
-// ============================================================
-// DÍA 6 (4/9) — Reemplaza renderizarCatalogo: mensaje "sin resultados"
-// (Borrá la versión de renderizarCatalogo del Día 2 cuando actives esta)
-// Commit: "Combina búsqueda y filtro, agrega mensaje sin resultados"
-// ============================================================
-/*
 const mensajeSinResultados = document.getElementById("sin-resultados");
 
 function renderizarCatalogo(lista) {
@@ -93,7 +64,7 @@ function renderizarCatalogo(lista) {
     contenedorCatalogo.appendChild(crearTarjetaProducto(producto));
   });
 }
-*/
+
 
 
 // ============================================================
