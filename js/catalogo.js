@@ -7,12 +7,6 @@ console.log("Productos cargados:", productos.length, productos);
 const contenedorCatalogo = document.getElementById("catalogo");
 
 
-function renderizarCatalogo(lista) {
-  contenedorCatalogo.innerHTML = "";
-  lista.forEach((producto) => {
-    contenedorCatalogo.appendChild(crearTarjetaProducto(producto));
-  });
-}
 
 const inputBusqueda = document.getElementById("buscador");
 
@@ -76,13 +70,6 @@ function limpiarFiltros() {
 btnLimpiar.addEventListener("click", limpiarFiltros);
 
 
-// ============================================================
-// DÍA 8 (6/9) — Reemplaza crearTarjetaProducto: agrega el enlace "Ver detalle"
-// (Borrá la versión del Día 3 cuando actives esta. producto.html todavía puede
-//  seguir en desarrollo, el enlace ya funciona igual)
-// Commit: "Enlaza tarjetas del catálogo al detalle de producto"
-// ============================================================
-/*
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("div");
   tarjeta.classList.add("col-md-4", "mb-4");
@@ -100,7 +87,6 @@ function crearTarjetaProducto(producto) {
   `;
   return tarjeta;
 }
-*/
 
 
 // ============================================================
