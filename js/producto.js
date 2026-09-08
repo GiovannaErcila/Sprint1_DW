@@ -31,16 +31,12 @@ function renderizarDetalle(producto) {
 const idProducto = obtenerIdDesdeURL();
 const producto = idProducto ? buscarProductoPorId(idProducto) : null;
 
-if (producto) {
-  renderizarDetalle(producto);
-}
-
 
 // ============================================================
 // DÍA 10 (8/9) — Mensaje "producto no encontrado"
 // Commit: "Agrega mensaje de producto no encontrado"
 // ============================================================
-/*
+
 const mensajeNoEncontrado = document.getElementById("producto-no-encontrado");
 
 function mostrarNoEncontrado() {
@@ -54,7 +50,7 @@ if (producto) {
 } else {
   mostrarNoEncontrado();
 }
-*/
+
 
 
 // ============================================================
