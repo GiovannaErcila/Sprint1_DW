@@ -7,7 +7,6 @@ console.log("Productos cargados:", productos.length, productos);
 const contenedorCatalogo = document.getElementById("catalogo");
 
 
-
 const inputBusqueda = document.getElementById("buscador");
 
 function aplicarFiltros() {
@@ -70,32 +69,7 @@ function limpiarFiltros() {
 btnLimpiar.addEventListener("click", limpiarFiltros);
 renderizarCatalogo(productos);
 
-function crearTarjetaProducto(producto) {
-  const tarjeta = document.createElement("div");
-  tarjeta.classList.add("col-md-4", "mb-4");
-  tarjeta.innerHTML = `
-    <div class="card h-100">
-      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">${producto.nombre}</h5>
-        <p class="card-text text-muted mb-1">${producto.categoria}</p>
-        <p class="card-text fw-bold">$${producto.precio.toLocaleString("es-UY")}</p>
-        <p class="card-text"><small>Stock: ${producto.stock}</small></p>
-        <a href="producto.html?id=${producto.id}" class="btn btn-outline-primary btn-sm mt-auto">Ver detalle</a>
-      </div>
-    </div>
-  `;
-  return tarjeta;
-}
 
-
-// ============================================================
-// DÍA 11 (9/9) — Reemplaza crearTarjetaProducto: agrega botón "Agregar al carrito"
-// (Ese día también agregás <script src="js/carrito.js"></script> en catalogo.html,
-//  ANTES del script de catalogo.js, porque agregarAlCarrito vive ahí)
-// Commit: "Implementa agregar productos al carrito con LocalStorage"
-// ============================================================
-/*
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("div");
   tarjeta.classList.add("col-md-4", "mb-4");
@@ -124,4 +98,4 @@ function crearTarjetaProducto(producto) {
 
   return tarjeta;
 }
-*/
+
