@@ -99,11 +99,14 @@ function crearTarjetaProducto(producto) {
 
   const botonAgregar = tarjeta.querySelector("button[data-id]");
   botonAgregar.addEventListener("click", () => {
-    agregarAlCarrito(producto.id, 1);
-    botonAgregar.textContent = "Agregado";
-    setTimeout(() => (botonAgregar.textContent = "Agregar"), 1000);
+    const agregado = agregarAlCarrito(producto.id, 1);
+    if (agregado) {
+      botonAgregar.textContent = "Agregado";
+      setTimeout(() => (botonAgregar.textContent = "Agregar"), 1000);
+    } else {
+      alert(`Ya tenés el stock máximo de "${producto.nombre}" en el carrito.`);
+    }
   });
 
   return tarjeta;
 }
-

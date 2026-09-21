@@ -31,19 +31,26 @@ function actualizarBadgeCarrito() {
 function agregarAlCarrito(idProducto, cantidad) {
   const carrito = obtenerCarrito();
   const producto = productos.find((p) => p.id === idProducto);
-  if (!producto) return;
+  if (!producto) return false;
 
   const item = carrito.find((i) => i.id === idProducto);
+  const cantidadActual = item ? item.cantidad : 0;
+
+  if (cantidadActual >= producto.stock) {
+    return false;
+  }
+
+  const nuevaCantidad = Math.min(cantidadActual + cantidad, producto.stock);
 
   if (item) {
-    const nuevaCantidad = item.cantidad + cantidad;
-    item.cantidad = Math.min(nuevaCantidad, producto.stock);
+    item.cantidad = nuevaCantidad;
   } else {
-    carrito.push({ id: idProducto, cantidad: Math.min(cantidad, producto.stock) });
+    carrito.push({ id: idProducto, cantidad: nuevaCantidad });
   }
 
   guardarCarrito(carrito);
   if (typeof renderizarCarrito === "function") renderizarCarrito();
+  return true;
 }
 
 function cambiarCantidad(idProducto, delta) {

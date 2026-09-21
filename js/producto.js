@@ -46,9 +46,12 @@ function renderizarDetalle(producto) {
     </div>
   `;
 
-  document.getElementById("btn-agregar-detalle").addEventListener("click", () => {
-    agregarAlCarrito(producto.id, 1);
+document.getElementById("btn-agregar-detalle").addEventListener("click", () => {
+  const agregado = agregarAlCarrito(producto.id, 1);
+  if (agregado) {
     alert(`${producto.nombre} se agregó al carrito.`);
-  });
+  } else {
+    alert(`Ya tenés el stock máximo de "${producto.nombre}" en el carrito.`);
+  }
+});
 }
-
