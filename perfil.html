@@ -51,7 +51,9 @@
 
   <main>
     <div class="container py-5">
-      <div class="row justify-content-center">
+
+      <!-- Formularios de registro e inicio de sesión -->
+      <div id="formularios-auth" class="row justify-content-center g-4">
         <div class="col-md-6">
           <h1 class="h3 mb-4 text-center">Crear cuenta</h1>
 
@@ -73,12 +75,34 @@
 
             <button type="submit" class="btn btn-bn-primary w-100">Registrarme</button>
           </form>
+        </div>
 
-          <p class="text-center text-muted small mt-4">
-            El inicio de sesión estará disponible en los próximos días.
-          </p>
+        <div class="col-md-6">
+          <h2 class="h3 mb-4 text-center">Iniciar sesión</h2>
+
+          <form id="form-login" novalidate>
+            <div class="mb-3">
+              <label for="login-correo" class="form-label">Correo electrónico</label>
+              <input type="email" id="login-correo" class="form-control" placeholder="tu@correo.com">
+            </div>
+            <div class="mb-3">
+              <label for="login-contrasena" class="form-label">Contraseña</label>
+              <input type="password" id="login-contrasena" class="form-control" placeholder="Tu contraseña">
+            </div>
+
+            <p id="mensaje-login" class="small mb-3" role="alert"></p>
+
+            <button type="submit" class="btn btn-bn-primary w-100">Ingresar</button>
+          </form>
         </div>
       </div>
+
+      <!-- Panel que se muestra una vez iniciada la sesión -->
+      <div id="panel-sesion" class="text-center mt-5 d-none">
+        <p class="fs-5">Sesión iniciada como <strong id="sesion-correo"></strong></p>
+        <button id="btn-cerrar-sesion" class="btn btn-outline-secondary">Cerrar sesión</button>
+      </div>
+
     </div>
   </main>
 
@@ -120,14 +144,15 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="modal-title h5" id="modalLoginAvisoLabel">Funcionalidad en desarrollo</h2>
+          <h2 class="modal-title h5" id="modalLoginAvisoLabel">Iniciá sesión desde Mi perfil</h2>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          El inicio de sesión estará disponible en los próximos días de este mismo sprint.
+          Por ahora, el inicio de sesión se hace desde la página "Mi perfil". Pronto vas a poder
+          hacerlo directamente desde acá.
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-bn-primary" data-bs-dismiss="modal">Entendido</button>
+          <a href="perfil.html" class="btn btn-bn-primary" data-bs-dismiss="modal">Ir a Mi perfil</a>
         </div>
       </div>
     </div>
