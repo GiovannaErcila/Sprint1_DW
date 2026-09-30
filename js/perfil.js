@@ -1,12 +1,15 @@
 // js/perfil.js
 // Día 2: registro de usuarios.
 // Día 3: inicio y cierre de sesión, con mensajes de error traducidos.
+// Día 4: el panel de "sesión iniciada" ahora reacciona a onAuthStateChanged,
+// así que se mantiene correcto también al recargar la página.
 
 import { auth } from "./firebase/config.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const formRegistro = document.getElementById("form-registro");
@@ -54,6 +57,17 @@ function mostrarFormularios() {
   panelSesion.classList.add("d-none");
 }
 
+// --- Mantener la vista sincronizada con el estado real de la sesión -----
+// (Día 4: esto reemplaza el toggle manual que hacíamos ayer al loguearse)
+
+onAuthStateChanged(auth, (usuario) => {
+  if (usuario) {
+    mostrarSesionIniciada(usuario.email);
+  } else {
+    mostrarFormularios();
+  }
+});
+
 // --- Registro (Día 2) ---------------------------------------------------
 
 function validarRegistro(nombre, correo, contrasena) {
@@ -96,6 +110,8 @@ formRegistro.addEventListener("submit", async (evento) => {
 });
 
 // --- Inicio y cierre de sesión (Día 3) -----------------------------------
+// Ya no necesitan cambiar la vista manualmente: onAuthStateChanged (arriba)
+// se encarga apenas Firebase confirma el login o logout.
 
 formLogin.addEventListener("submit", async (evento) => {
   evento.preventDefault();
@@ -109,10 +125,8 @@ formLogin.addEventListener("submit", async (evento) => {
   }
 
   try {
-    const credencial = await signInWithEmailAndPassword(auth, correo, contrasena);
-    mostrarMensaje(mensajeLogin, "", "exito");
+    await signInWithEmailAndPassword(auth, correo, contrasena);
     formLogin.reset();
-    mostrarSesionIniciada(credencial.user.email);
   } catch (error) {
     mostrarMensaje(mensajeLogin, traducirErrorFirebase(error.code), "error");
   }
@@ -120,6 +134,5 @@ formLogin.addEventListener("submit", async (evento) => {
 
 btnCerrarSesion.addEventListener("click", async () => {
   await signOut(auth);
-  mostrarFormularios();
 });
 
