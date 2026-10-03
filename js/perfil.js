@@ -100,12 +100,17 @@ formRegistro.addEventListener("submit", async (evento) => {
     return;
   }
 
+  const botonRegistro = formRegistro.querySelector("button[type='submit']");
+  botonRegistro.disabled = true;
+
   try {
     await createUserWithEmailAndPassword(auth, correo, contrasena);
     mostrarMensaje(mensajeRegistro, "Cuenta creada correctamente. Ya podés iniciar sesión.", "exito");
     formRegistro.reset();
   } catch (error) {
     mostrarMensaje(mensajeRegistro, traducirErrorFirebase(error.code), "error");
+  } finally {
+    botonRegistro.disabled = false;
   }
 });
 
@@ -124,15 +129,21 @@ formLogin.addEventListener("submit", async (evento) => {
     return;
   }
 
+  const botonLogin = formLogin.querySelector("button[type='submit']");
+  botonLogin.disabled = true;
+
   try {
     await signInWithEmailAndPassword(auth, correo, contrasena);
     formLogin.reset();
   } catch (error) {
     mostrarMensaje(mensajeLogin, traducirErrorFirebase(error.code), "error");
+  } finally {
+    botonLogin.disabled = false;
   }
 });
 
 btnCerrarSesion.addEventListener("click", async () => {
   await signOut(auth);
 });
+
 
