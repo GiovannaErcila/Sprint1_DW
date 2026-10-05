@@ -71,8 +71,9 @@
         </div>
       </div>
 
+      <p id="cargando-catalogo" class="text-muted">Cargando productos...</p>
+      <p id="error-catalogo" class="text-danger d-none"></p>
       <p id="sin-resultados" class="text-muted d-none">No se encontraron productos con esos criterios.</p>
-
       <div class="row" id="catalogo"></div>
     </div>
   </main>
@@ -129,9 +130,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/productos.js"></script>
-  <script src="js/carrito.js"></script>
-  <script src="js/catalogo.js"></script>
+  <script type="module" src="js/catalogo.js"></script>
   <script type="module" src="js/sesion.js"></script>
 </body>
 </html>

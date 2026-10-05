@@ -1,112 +1,139 @@
-// catalogo.js
+import { obtenerProductosFirestore } from "./firebase/productos.js";
+import { agregarAlCarrito, establecerProductosCarrito } from "./carrito.js";
 
-// Commit: "Agrega array de productos con datos base"
-console.log("Productos cargados:", productos.length, productos);
+let productosGlobales = [];
 
-// Commit: "Genera catálogo dinámico desde JavaScript"
 const contenedorCatalogo = document.getElementById("catalogo");
-
-
-const inputBusqueda = document.getElementById("buscador");
-
-function aplicarFiltros() {
-  const texto = inputBusqueda.value.trim().toLowerCase();
-  const resultado = productos.filter((p) => p.nombre.toLowerCase().includes(texto));
-  renderizarCatalogo(resultado);
-}
-
-inputBusqueda.addEventListener("input", aplicarFiltros);
-
-
-const selectCategoria = document.getElementById("filtro-categoria");
-
-function cargarCategorias() {
-  const categorias = [...new Set(productos.map((p) => p.categoria))];
-  categorias.forEach((categoria) => {
-    const opcion = document.createElement("option");
-    opcion.value = categoria;
-    opcion.textContent = categoria;
-    selectCategoria.appendChild(opcion);
-  });
-}
-
-function aplicarFiltros() {
-  const texto = inputBusqueda.value.trim().toLowerCase();
-  const categoria = selectCategoria.value;
-  const resultado = productos.filter((p) => {
-    const coincideTexto = p.nombre.toLowerCase().includes(texto);
-    const coincideCategoria = categoria === "" || p.categoria === categoria;
-    return coincideTexto && coincideCategoria;
-  });
-  renderizarCatalogo(resultado);
-}
-
-cargarCategorias();
-selectCategoria.addEventListener("change", aplicarFiltros);
-
-const mensajeSinResultados = document.getElementById("sin-resultados");
-
-function renderizarCatalogo(lista) {
-  contenedorCatalogo.innerHTML = "";
-  if (lista.length === 0) {
-    mensajeSinResultados.classList.remove("d-none");
-    return;
-  }
-  mensajeSinResultados.classList.add("d-none");
-  lista.forEach((producto) => {
-    contenedorCatalogo.appendChild(crearTarjetaProducto(producto));
-  });
-}
-
+const buscadorInput = document.getElementById("buscador");
+const filtroCategoria = document.getElementById("filtro-categoria");
 const btnLimpiar = document.getElementById("limpiar-filtros");
 
-function limpiarFiltros() {
-  inputBusqueda.value = "";
-  selectCategoria.value = "";
-  renderizarCatalogo(productos);
-}
+const mensajeCargando = document.getElementById("cargando-catalogo");
+const mensajeError = document.getElementById("error-catalogo");
+const mensajeSinResultados = document.getElementById("sin-resultados");
 
-btnLimpiar.addEventListener("click", limpiarFiltros);
-renderizarCatalogo(productos);
-function posicionImagen(id) {
-  const posiciones = {
-    p1: "top",     // Auriculares - se corta arriba, mostramos más de la parte de arriba
-    p6: "bottom",  // Mochila - no sale entera, probamos con la parte de abajo
-    p8: "center",  // Webcam - probamos centrado primero
-    p9: "top"      // Silla Gamer - probamos con la parte de arriba
-  };
-  return posiciones[id] || "center";
-}
+async function iniciarCatalogo() {
+  try {
+    productosGlobales = await obtenerProductosFirestore();
 
-function crearTarjetaProducto(producto) {
-  const tarjeta = document.createElement("div");
-  tarjeta.classList.add("col-md-4", "mb-4");
-  tarjeta.innerHTML = `
-    <div class="card h-100">
-      <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}" style="${producto.id === 'p4' || producto.id === 'p1' || producto.id === 'p6' || producto.id === 'p8' || producto.id === 'p9' ? 'object-position: top;' : ''}">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">${producto.nombre}</h5>
-        <p class="card-text text-muted mb-1">${producto.categoria}</p>
-        <p class="card-text fw-bold">$${producto.precio.toLocaleString("es-UY")}</p>
-        <p class="card-text"><small>Stock: ${producto.stock}</small></p>
-        <div class="mt-auto d-flex gap-2">
-          <a href="producto.html?id=${producto.id}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
-          <button class="btn btn-primary btn-sm" data-id="${producto.id}">Agregar</button>
-        </div>
-      </div>
-    </div>
-  `;
+    if (mensajeCargando) mensajeCargando.classList.add("d-none");
 
-  const botonAgregar = tarjeta.querySelector("button[data-id]");
-  botonAgregar.addEventListener("click", () => {
-    const agregado = agregarAlCarrito(producto.id, 1);
-    if (agregado) {
-      botonAgregar.textContent = "Agregado";
-      setTimeout(() => (botonAgregar.textContent = "Agregar"), 1000);
-    } else {
-      alert(`Ya tenés el stock máximo de "${producto.nombre}" en el carrito.`);
+    if (!productosGlobales || productosGlobales.length === 0) {
+      if (mensajeSinResultados) mensajeSinResultados.classList.remove("d-none");
+      return;
     }
+
+    establecerProductosCarrito(productosGlobales);
+    poblarCategorias(productosGlobales);
+    aplicarFiltros();
+  } catch (error) {
+    console.error("Error al iniciar el catálogo:", error);
+    if (mensajeCargando) mensajeCargando.classList.add("d-none");
+    if (mensajeError) {
+      mensajeError.textContent = "Ocurrió un error al cargar los productos.";
+      mensajeError.classList.remove("d-none");
+    }
+  }
+}
+
+// Carga las categorías en el <select> sin duplicados
+function poblarCategorias(productos) {
+  if (!filtroCategoria) return;
+
+  const categorias = [...new Set(productos.map((p) => p.categoria).filter(Boolean))];
+  filtroCategoria.innerHTML = `<option value="">Todas las categorías</option>`;
+
+  categorias.forEach((cat) => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    filtroCategoria.appendChild(option);
+  });
+}
+
+// Aplica búsqueda y categoría en memoria
+function aplicarFiltros() {
+  const texto = buscadorInput ? buscadorInput.value.toLowerCase().trim() : "";
+  const categoriaSeleccionada = filtroCategoria ? filtroCategoria.value : "";
+
+  const filtrados = productosGlobales.filter((producto) => {
+    const coincideNombre = producto.nombre ? producto.nombre.toLowerCase().includes(texto) : true;
+    const coincideCategoria = categoriaSeleccionada ? producto.categoria === categoriaSeleccionada : true;
+    return coincideNombre && coincideCategoria;
   });
 
-  return tarjeta;
+  renderizarCatalogo(filtrados);
 }
+
+// Renderiza las tarjetas de productos
+function renderizarCatalogo(lista) {
+  if (!contenedorCatalogo) return;
+
+  contenedorCatalogo.innerHTML = "";
+
+  if (lista.length === 0) {
+    if (mensajeSinResultados) mensajeSinResultados.classList.remove("d-none");
+    return;
+  }
+
+  if (mensajeSinResultados) mensajeSinResultados.classList.add("d-none");
+
+  lista.forEach((prod) => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+
+    const tieneStock = prod.stock > 0;
+
+    col.innerHTML = `
+      <div class="card h-100 shadow-sm">
+        <img src="${prod.imagen || 'assets/placeholder.jpg'}" class="card-img-top" alt="${prod.nombre}" style="height: 200px; object-fit: cover;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">${prod.nombre}</h5>
+          <p class="card-text text-muted small mb-2">${prod.categoria || 'Sin categoría'}</p>
+          <p class="fw-bold fs-5 text-primary">$${prod.precio}</p>
+          <p class="small ${tieneStock ? 'text-success' : 'text-danger'} mb-3">
+            ${tieneStock ? `Stock disponible: ${prod.stock}` : 'Sin stock disponible'}
+          </p>
+          <div class="mt-auto d-flex gap-2">
+            <a href="producto.html?id=${prod.id}" class="btn btn-outline-secondary btn-sm flex-fill">Ver detalle</a>
+            <button 
+              class="btn btn-bn-primary btn-sm flex-fill btn-agregar" 
+              data-id="${prod.id}"
+              ${!tieneStock ? 'disabled' : ''}>
+              ${tieneStock ? 'Agregar' : 'Agotado'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    contenedorCatalogo.appendChild(col);
+  });
+
+  // Evento para agregar al carrito
+  document.querySelectorAll(".btn-agregar").forEach((boton) => {
+    boton.addEventListener("click", (e) => {
+      const idProd = e.target.getAttribute("data-id");
+      const prodSeleccionado = productosGlobales.find((p) => p.id === idProd);
+
+      if (prodSeleccionado && prodSeleccionado.stock > 0) {
+        agregarAlCarrito(prodSeleccionado);
+      } else {
+        alert("El producto no tiene stock disponible.");
+      }
+    });
+  });
+}
+
+// Event Listeners
+if (buscadorInput) buscadorInput.addEventListener("input", aplicarFiltros);
+if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
+if (btnLimpiar) {
+  btnLimpiar.addEventListener("click", () => {
+    if (buscadorInput) buscadorInput.value = "";
+    if (filtroCategoria) filtroCategoria.value = "";
+    aplicarFiltros();
+  });
+}
+
+iniciarCatalogo();

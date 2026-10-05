@@ -1,24 +1,24 @@
 // carrito.js
-// Requiere productos.js cargado antes.
-// Se incluye en catalogo.html, producto.html y carrito.html porque las tres páginas
-// necesitan agregarAlCarrito() o leer/mostrar el carrito.
-
+import { obtenerProductosFirestore } from "./productos.js";
 const CLAVE_CARRITO = "bytenova_carrito";
+
+// Almacena localmente los productos descargados de Firestore para este módulo
+let productosCache = [];
 
 // --- Persistencia en LocalStorage --------------------------------------
 
-function obtenerCarrito() {
+export function obtenerCarrito() {
   const datos = localStorage.getItem(CLAVE_CARRITO);
   return datos ? JSON.parse(datos) : [];
 }
 
-function guardarCarrito(carrito) {
+export function guardarCarrito(carrito) {
   localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
   actualizarBadgeCarrito();
 }
 
-// Actualiza el número del carrito en el ícono del navbar (presente en todas las páginas)
-function actualizarBadgeCarrito() {
+// Actualiza el número del carrito en el ícono del navbar
+export function actualizarBadgeCarrito() {
   const carrito = obtenerCarrito();
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
   document.querySelectorAll(".cart-indicator .badge").forEach((badge) => {
@@ -26,11 +26,24 @@ function actualizarBadgeCarrito() {
   });
 }
 
+// Asegura que los productos estén cargados desde Firestore si la página los necesita
+async function asegurarProductos() {
+  if (productosCache.length === 0) {
+    productosCache = await obtenerProductosFirestore();
+  }
+  return productosCache;
+}
+
+// Recibe el listado de productos directamente desde catalogo.js
+export function establecerProductosCarrito(productos) {
+  productosCache = productos;
+}
+
 // --- Operaciones sobre el carrito ---------------------------------------
 
-function agregarAlCarrito(idProducto, cantidad) {
+export function agregarAlCarrito(idProducto, cantidad = 1) {
   const carrito = obtenerCarrito();
-  const producto = productos.find((p) => p.id === idProducto);
+  const producto = productosCache.find((p) => p.id === idProducto);
   if (!producto) return false;
 
   const item = carrito.find((i) => i.id === idProducto);
@@ -49,13 +62,13 @@ function agregarAlCarrito(idProducto, cantidad) {
   }
 
   guardarCarrito(carrito);
-  if (typeof renderizarCarrito === "function") renderizarCarrito();
+  renderizarCarrito();
   return true;
 }
 
-function cambiarCantidad(idProducto, delta) {
+export function cambiarCantidad(idProducto, delta) {
   const carrito = obtenerCarrito();
-  const producto = productos.find((p) => p.id === idProducto);
+  const producto = productosCache.find((p) => p.id === idProducto);
   const item = carrito.find((i) => i.id === idProducto);
   if (!item || !producto) return;
 
@@ -74,38 +87,39 @@ function cambiarCantidad(idProducto, delta) {
   renderizarCarrito();
 }
 
-function eliminarDelCarrito(idProducto) {
+export function eliminarDelCarrito(idProducto) {
   let carrito = obtenerCarrito();
   carrito = carrito.filter((i) => i.id !== idProducto);
   guardarCarrito(carrito);
   renderizarCarrito();
 }
 
-// --- Render (solo aplica en carrito.html) --------------------------------
+// --- Render (Solo ejecuta en carrito.html) --------------------------------
 
 const contenedorCarrito = document.getElementById("carrito-items");
 const mensajeCarritoVacio = document.getElementById("carrito-vacio");
 const totalCarritoEl = document.getElementById("carrito-total");
 const btnConfirmarCompra = document.getElementById("confirmar-compra");
 
-function renderizarCarrito() {
-  if (!contenedorCarrito) return; // esta función solo corre en carrito.html
+export async function renderizarCarrito() {
+  if (!contenedorCarrito) return; // Si no está el contenedor, no hace nada (ej: en el catálogo)
 
+  await asegurarProductos();
   const carrito = obtenerCarrito();
   contenedorCarrito.innerHTML = "";
 
   if (carrito.length === 0) {
-    mensajeCarritoVacio.classList.remove("d-none");
-    totalCarritoEl.textContent = "$0";
+    if (mensajeCarritoVacio) mensajeCarritoVacio.classList.remove("d-none");
+    if (totalCarritoEl) totalCarritoEl.textContent = "$0";
     return;
   }
 
-  mensajeCarritoVacio.classList.add("d-none");
+  if (mensajeCarritoVacio) mensajeCarritoVacio.classList.add("d-none");
 
   let total = 0;
 
   carrito.forEach((item) => {
-    const producto = productos.find((p) => p.id === item.id);
+    const producto = productosCache.find((p) => p.id === item.id);
     if (!producto) return;
 
     const subtotal = producto.precio * item.cantidad;
@@ -142,7 +156,9 @@ function renderizarCarrito() {
     contenedorCarrito.appendChild(fila);
   });
 
-  totalCarritoEl.textContent = `$${total.toLocaleString("es-UY")}`;
+  if (totalCarritoEl) {
+    totalCarritoEl.textContent = `$${total.toLocaleString("es-UY")}`;
+  }
 }
 
 if (btnConfirmarCompra) {
@@ -151,10 +167,10 @@ if (btnConfirmarCompra) {
   });
 }
 
-// Si estamos en carrito.html, renderizar apenas carga la página
+// --- Inicialización automática al cargar el script -----------------------
+
+actualizarBadgeCarrito();
+
 if (contenedorCarrito) {
   renderizarCarrito();
 }
-
-// El badge se actualiza en cualquier página que incluya carrito.js
-actualizarBadgeCarrito();
