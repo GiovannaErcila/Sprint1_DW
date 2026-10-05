@@ -1,5 +1,5 @@
 // js/producto.js
-import { obtenerProductosFirestore } from "./productos.js";
+import { obtenerProductosFirestore } from "./firebase/productos.js";
 
 // Elementos del DOM
 const mensajeCargando = document.getElementById("cargando-producto");

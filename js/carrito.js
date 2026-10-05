@@ -1,5 +1,5 @@
 // carrito.js
-import { obtenerProductosFirestore } from "./productos.js";
+import { obtenerProductosFirestore } from "./firebase/productos.js";
 const CLAVE_CARRITO = "bytenova_carrito";
 
 // Almacena localmente los productos descargados de Firestore para este módulo
