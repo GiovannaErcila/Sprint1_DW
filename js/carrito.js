@@ -1,9 +1,22 @@
 // carrito.js
 import { obtenerProductosFirestore } from "./firebase/productos.js";
+import { auth, db } from "./firebase/config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  doc,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
 const CLAVE_CARRITO = "bytenova_carrito";
 
 // Almacena localmente los productos descargados de Firestore para este módulo
 let productosCache = [];
+
+// Se mantiene actualizado con el usuario autenticado (o null si no hay sesión)
+let usuarioActual = null;
+onAuthStateChanged(auth, (usuario) => {
+  usuarioActual = usuario;
+});
 
 // --- Persistencia en LocalStorage --------------------------------------
 
@@ -34,7 +47,7 @@ async function asegurarProductos() {
   return productosCache;
 }
 
-// Recibe el listado de productos directamente desde catalogo.js
+// Recibe el listado de productos directamente desde catalogo.js / producto.js
 export function establecerProductosCarrito(productos) {
   productosCache = productos;
 }
@@ -161,9 +174,95 @@ export async function renderizarCarrito() {
   }
 }
 
+// --- Confirmar compra: valida sesión y stock real en Firestore (Día 9) -----
+
+// Consulta Firestore DE NUEVO para cada producto del carrito (no confía en
+// productosCache, que pudo quedar desactualizado desde que se agregó).
+async function verificarStockActual(carrito) {
+  const problemas = [];
+
+  for (const item of carrito) {
+    const snap = await getDoc(doc(db, "productos", item.id));
+
+    if (!snap.exists()) {
+      problemas.push({ id: item.id, nombre: item.id, stockActual: 0, cantidadEnCarrito: item.cantidad });
+      continue;
+    }
+
+    const datos = snap.data();
+    if (item.cantidad > datos.stock) {
+      problemas.push({
+        id: item.id,
+        nombre: datos.nombre,
+        stockActual: datos.stock,
+        cantidadEnCarrito: item.cantidad,
+      });
+    }
+  }
+
+  return problemas;
+}
+
+// Si algún producto ya no tiene el stock que el carrito suponía, ajusta las
+// cantidades (o lo elimina si quedó en 0) para que el carrito sea honesto.
+function ajustarCarritoAStockReal(problemas) {
+  let carrito = obtenerCarrito();
+
+  problemas.forEach((p) => {
+    if (p.stockActual <= 0) {
+      carrito = carrito.filter((i) => i.id !== p.id);
+    } else {
+      const item = carrito.find((i) => i.id === p.id);
+      if (item) item.cantidad = p.stockActual;
+    }
+  });
+
+  guardarCarrito(carrito);
+}
+
 if (btnConfirmarCompra) {
-  btnConfirmarCompra.addEventListener("click", () => {
-    alert("Esta funcionalidad todavía no está disponible. Se implementará en un próximo sprint.");
+  btnConfirmarCompra.addEventListener("click", async () => {
+    if (!usuarioActual) {
+      alert("Tenés que iniciar sesión para confirmar la compra.");
+      window.location.href = "perfil.html";
+      return;
+    }
+
+    const carrito = obtenerCarrito();
+    if (carrito.length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+
+    btnConfirmarCompra.disabled = true;
+    const textoOriginal = btnConfirmarCompra.textContent;
+    btnConfirmarCompra.textContent = "Verificando stock...";
+
+    try {
+      const problemas = await verificarStockActual(carrito);
+
+      if (problemas.length > 0) {
+        const detalle = problemas
+          .map((p) => `- ${p.nombre}: quedan ${p.stockActual} (tenías ${p.cantidadEnCarrito})`)
+          .join("\n");
+        alert(
+          "Algunos productos cambiaron de stock desde que los agregaste al carrito:\n" + detalle
+        );
+        ajustarCarritoAStockReal(problemas);
+        renderizarCarrito();
+        return;
+      }
+
+      // El stock está confirmado. El registro del pedido en Firestore y el
+      // descuento real de stock se implementan en el próximo paso del sprint.
+      alert("¡Compra confirmada! (El registro del pedido se implementa en el próximo paso del sprint.)");
+    } catch (error) {
+      console.error(error);
+      alert("Ocurrió un error al verificar el stock. Intentá de nuevo.");
+    } finally {
+      btnConfirmarCompra.disabled = false;
+      btnConfirmarCompra.textContent = textoOriginal;
+    }
   });
 }
 
