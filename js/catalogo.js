@@ -117,6 +117,10 @@ function renderizarCatalogo(lista) {
       const prodSeleccionado = productosGlobales.find((p) => p.id === idProd);
 
       if (prodSeleccionado && prodSeleccionado.stock > 0) {
+        const agregado = agregarAlCarrito(prodSeleccionado.id, 1);
+         if (!agregado) {
+           alert(`Ya tenés el stock máximo de "${prodSeleccionado.nombre}" en el carrito.`);
+  }
         agregarAlCarrito(prodSeleccionado);
       } else {
         alert("El producto no tiene stock disponible.");

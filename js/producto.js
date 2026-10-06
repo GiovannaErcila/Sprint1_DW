@@ -1,5 +1,6 @@
 // js/producto.js
 import { obtenerProductosFirestore } from "./firebase/productos.js";
+import { agregarAlCarrito, establecerProductosCarrito } from "./carrito.js";
 
 // Elementos del DOM
 const mensajeCargando = document.getElementById("cargando-producto");
