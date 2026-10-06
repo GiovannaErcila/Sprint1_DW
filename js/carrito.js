@@ -5,6 +5,9 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/f
 import {
   doc,
   getDoc,
+  collection,
+  runTransaction,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const CLAVE_CARRITO = "bytenova_carrito";
@@ -220,6 +223,67 @@ function ajustarCarritoAStockReal(problemas) {
   guardarCarrito(carrito);
 }
 
+// --- Registrar el pedido y descontar stock, todo junto (Día 10) -----------
+// Usamos una transacción: primero lee el stock real de cada producto, valida
+// que alcance, y recién ahí escribe el pedido y descuenta el stock. Si algo
+// falla en el medio, Firestore no aplica ninguno de los cambios.
+async function registrarPedido(carrito, usuario) {
+  const pedidoRef = doc(collection(db, "pedidos"));
+
+  await runTransaction(db, async (transaction) => {
+    const lecturas = [];
+
+    // 1. Leer el stock actual de cada producto (todas las lecturas antes de escribir)
+    for (const item of carrito) {
+      const productoRef = doc(db, "productos", item.id);
+      const snap = await transaction.get(productoRef);
+      if (!snap.exists()) {
+        throw new Error(`El producto "${item.id}" ya no existe.`);
+      }
+      lecturas.push({ item, productoRef, datos: snap.data() });
+    }
+
+    // 2. Validar que haya stock suficiente para TODOS antes de escribir nada
+    for (const { item, datos } of lecturas) {
+      if (item.cantidad > datos.stock) {
+        throw new Error(`No hay stock suficiente de "${datos.nombre}".`);
+      }
+    }
+
+    // 3. Armar el detalle del pedido y descontar el stock (nunca negativo)
+    const itemsPedido = [];
+    let total = 0;
+
+    for (const { item, productoRef, datos } of lecturas) {
+      const subtotal = datos.precio * item.cantidad;
+      total += subtotal;
+
+      itemsPedido.push({
+        id: item.id,
+        nombre: datos.nombre,
+        precio: datos.precio,
+        cantidad: item.cantidad,
+        subtotal,
+      });
+
+      const nuevoStock = Math.max(datos.stock - item.cantidad, 0);
+      transaction.update(productoRef, { stock: nuevoStock });
+    }
+
+    // 4. Registrar el pedido
+    transaction.set(pedidoRef, {
+      usuarioId: usuario.uid,
+      usuarioCorreo: usuario.email,
+      productos: itemsPedido,
+      total,
+      fecha: serverTimestamp(),
+      estado: "confirmado",
+    });
+  });
+
+  return pedidoRef.id;
+}
+
 if (btnConfirmarCompra) {
   btnConfirmarCompra.addEventListener("click", async () => {
     if (!usuarioActual) {
@@ -253,12 +317,15 @@ if (btnConfirmarCompra) {
         return;
       }
 
-      // El stock está confirmado. El registro del pedido en Firestore y el
-      // descuento real de stock se implementan en el próximo paso del sprint.
-      alert("¡Compra confirmada! (El registro del pedido se implementa en el próximo paso del sprint.)");
+      btnConfirmarCompra.textContent = "Registrando pedido...";
+      const idPedido = await registrarPedido(carrito, usuarioActual);
+
+      alert(`¡Compra confirmada! Número de pedido: ${idPedido}`);
+      // El carrito todavía no se vacía acá a propósito — eso es el próximo
+      // paso del sprint, junto con mostrar el historial de pedidos.
     } catch (error) {
       console.error(error);
-      alert("Ocurrió un error al verificar el stock. Intentá de nuevo.");
+      alert("Ocurrió un error al confirmar la compra: " + error.message);
     } finally {
       btnConfirmarCompra.disabled = false;
       btnConfirmarCompra.textContent = textoOriginal;
