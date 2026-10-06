@@ -62,6 +62,38 @@
         <p class="text-muted mb-4">El producto que buscás no existe o el enlace es incorrecto.</p>
         <a href="catalogo.html" class="btn btn-bn-primary">Volver al catálogo</a>
       </div>
+        <div id="seccion-valoraciones" class="mt-5 d-none">
+        <h2 class="h4 mb-3">Valoraciones y comentarios</h2>
+
+        <div id="form-valoracion-wrapper" class="mb-4 d-none">
+          <form id="form-valoracion">
+            <div class="mb-2">
+              <label for="valoracion-puntuacion" class="form-label">Puntuación</label>
+              <select id="valoracion-puntuacion" class="form-select" style="max-width: 220px;">
+                <option value="5">5 - Excelente</option>
+                <option value="4">4 - Muy bueno</option>
+                <option value="3">3 - Bueno</option>
+                <option value="2">2 - Regular</option>
+                <option value="1">1 - Malo</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label for="valoracion-comentario" class="form-label">Comentario</label>
+              <textarea id="valoracion-comentario" class="form-control" rows="3" placeholder="Contanos tu experiencia con este producto"></textarea>
+            </div>
+            <p id="mensaje-valoracion" class="small mb-2"></p>
+            <button type="submit" class="btn btn-bn-primary">Publicar valoración</button>
+          </form>
+        </div>
+
+        <p id="valoracion-login-aviso" class="text-muted d-none">
+          <a href="perfil.html">Iniciá sesión</a> para dejar tu valoración.
+        </p>
+
+        <p id="valoraciones-cargando" class="text-muted">Cargando valoraciones...</p>
+        <p id="valoraciones-vacio" class="text-muted d-none">Todavía no hay valoraciones para este producto.</p>
+        <div id="lista-valoraciones"></div>
+      </div>
     </div>
   </main>
 

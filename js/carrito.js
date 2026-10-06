@@ -320,9 +320,10 @@ if (btnConfirmarCompra) {
       btnConfirmarCompra.textContent = "Registrando pedido...";
       const idPedido = await registrarPedido(carrito, usuarioActual);
 
+      guardarCarrito([]);
+      renderizarCarrito();
+
       alert(`¡Compra confirmada! Número de pedido: ${idPedido}`);
-      // El carrito todavía no se vacía acá a propósito — eso es el próximo
-      // paso del sprint, junto con mostrar el historial de pedidos.
     } catch (error) {
       console.error(error);
       alert("Ocurrió un error al confirmar la compra: " + error.message);

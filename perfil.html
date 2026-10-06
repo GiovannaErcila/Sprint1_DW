@@ -37,13 +37,9 @@
           </ul>
 
           <div class="d-flex align-items-center gap-3">
-            <button type="button" class="btn btn-login" id="btn-nav-login" data-bs-toggle="modal" data-bs-target="#modalLoginAviso">
-  Iniciar sesión
-</button>
-<div id="usuario-sesion" class="d-none align-items-center gap-2">
-  <span class="small text-light" id="nav-usuario-correo"></span>
-  <button type="button" class="btn btn-outline-light btn-sm" id="btn-nav-logout">Cerrar sesión</button>
-</div>
+            <button type="button" class="btn btn-login" data-bs-toggle="modal" data-bs-target="#modalLoginAviso">
+              Iniciar sesión
+            </button>
             <a href="carrito.html" class="cart-indicator" aria-label="Ver carrito de compras">
               <i class="bi bi-cart3"></i> <span class="badge rounded-pill">0</span>
             </a>
@@ -104,7 +100,14 @@
       <!-- Panel que se muestra una vez iniciada la sesión -->
       <div id="panel-sesion" class="text-center mt-5 d-none">
         <p class="fs-5">Sesión iniciada como <strong id="sesion-correo"></strong></p>
-        <button id="btn-cerrar-sesion" class="btn btn-outline-secondary">Cerrar sesión</button>
+        <button id="btn-cerrar-sesion" class="btn btn-outline-secondary mb-5">Cerrar sesión</button>
+
+        <div class="text-start">
+          <h2 class="h4 mb-3">Mis pedidos</h2>
+          <p id="pedidos-cargando" class="text-muted">Cargando pedidos...</p>
+          <p id="pedidos-vacio" class="text-muted d-none">Todavía no hiciste ninguna compra.</p>
+          <div id="lista-pedidos"></div>
+        </div>
       </div>
 
     </div>
@@ -166,6 +169,5 @@
   <script src="js/productos.js"></script>
   <script src="js/carrito.js"></script>
   <script type="module" src="js/perfil.js"></script>
-  <script type="module" src="js/sesion.js"></script>
 </body>
 </html>

@@ -4,13 +4,20 @@
 // Día 4: el panel de "sesión iniciada" ahora reacciona a onAuthStateChanged,
 // así que se mantiene correcto también al recargar la página.
 
-import { auth } from "./firebase/config.js";
+import { auth, db } from "./firebase/config.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const formRegistro = document.getElementById("form-registro");
 const mensajeRegistro = document.getElementById("mensaje-registro");
@@ -22,6 +29,10 @@ const contenedorFormularios = document.getElementById("formularios-auth");
 const panelSesion = document.getElementById("panel-sesion");
 const sesionCorreoEl = document.getElementById("sesion-correo");
 const btnCerrarSesion = document.getElementById("btn-cerrar-sesion");
+
+const pedidosCargando = document.getElementById("pedidos-cargando");
+const pedidosVacio = document.getElementById("pedidos-vacio");
+const listaPedidos = document.getElementById("lista-pedidos");
 
 // --- Utilidades compartidas --------------------------------------------
 
@@ -57,12 +68,65 @@ function mostrarFormularios() {
   panelSesion.classList.add("d-none");
 }
 
+// --- Mis pedidos (Día 11): solo los del usuario autenticado, filtrando por uid ---
+
+async function cargarPedidosUsuario(uid) {
+  pedidosCargando.classList.remove("d-none");
+  pedidosVacio.classList.add("d-none");
+  listaPedidos.innerHTML = "";
+
+  try {
+    const consulta = query(
+      collection(db, "pedidos"),
+      where("usuarioId", "==", uid),
+      orderBy("fecha", "desc")
+    );
+    const snapshot = await getDocs(consulta);
+
+    pedidosCargando.classList.add("d-none");
+
+    if (snapshot.empty) {
+      pedidosVacio.classList.remove("d-none");
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const pedido = docSnap.data();
+      const fecha = pedido.fecha ? pedido.fecha.toDate().toLocaleString("es-UY") : "Fecha no disponible";
+
+      const detalleProductos = (pedido.productos || [])
+        .map((p) => `${p.nombre} x${p.cantidad} ($${p.subtotal.toLocaleString("es-UY")})`)
+        .join(", ");
+
+      const tarjeta = document.createElement("div");
+      tarjeta.classList.add("card", "mb-3");
+      tarjeta.innerHTML = `
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h3 class="h6 mb-1">Pedido ${docSnap.id}</h3>
+            <span class="badge bg-success-subtle text-success">${pedido.estado || "confirmado"}</span>
+          </div>
+          <p class="small text-muted mb-2">${fecha}</p>
+          <p class="small mb-2">${detalleProductos}</p>
+          <p class="fw-bold mb-0">Total: $${pedido.total.toLocaleString("es-UY")}</p>
+        </div>
+      `;
+      listaPedidos.appendChild(tarjeta);
+    });
+  } catch (error) {
+    console.error(error);
+    pedidosCargando.classList.add("d-none");
+    listaPedidos.innerHTML = `<p class="text-danger">No se pudieron cargar tus pedidos.</p>`;
+  }
+}
+
 // --- Mantener la vista sincronizada con el estado real de la sesión -----
 // (Día 4: esto reemplaza el toggle manual que hacíamos ayer al loguearse)
 
 onAuthStateChanged(auth, (usuario) => {
   if (usuario) {
     mostrarSesionIniciada(usuario.email);
+    cargarPedidosUsuario(usuario.uid);
   } else {
     mostrarFormularios();
   }
