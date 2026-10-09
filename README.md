@@ -17,7 +17,6 @@ Firestore y Firebase Authentication en los siguientes sprints.
    navegador.
 4. No requiere instalación de dependencias: Bootstrap y las fuentes se cargan desde CDN.
 
----
 
 ## Funcionalidades desarrolladas en el Sprint 1
 - Identidad visual propia (nombre, logotipo textual, paleta de colores, tipografía).
@@ -94,15 +93,84 @@ Solo se guarda el id del producto y la cantidad elegida; el resto de los datos
 del producto (nombre, precio, imagen, stock) se buscan en el arreglo `productos`
 al momento de mostrarlos, para no duplicar información.
 
-## Funcionalidades pendientes
-- Registro e inicio de sesión con Firebase Authentication (Sprint 3).
-- Persistencia de datos en Cloud Firestore, reemplazando el arreglo local de
-  productos (Sprint 3).
-- Compra real desde el carrito (el botón "Confirmar compra" es un aviso por ahora).
-- Panel administrativo con operaciones CRUD (Sprint 4).
-- Roles de usuario y reglas de seguridad (Sprint 4).
+## Funcionalidades desarrolladas en el Sprint 3
+### Autenticación (Firebase Authentication)
+- Registro con correo y contraseña, con validación de campos (vacíos, formato de
+  correo, contraseña de al menos 6 caracteres).
+- Inicio y cierre de sesión, con mensajes de error en español (cuenta inexistente,
+  contraseña incorrecta, demasiados intentos, etc.).
+- La sesión se mantiene al recargar y entre páginas mediante `onAuthStateChanged()`.
+- El navbar de todas las páginas muestra el correo del usuario y el botón
+  "Cerrar sesión" cuando hay sesión iniciada.
+- En "Mi perfil", el panel de la cuenta solo se muestra con sesión iniciada.
 
----
+### Productos en Cloud Firestore
+- Los productos se leen desde la colección `productos` de Firestore (ya no desde un
+  arreglo local) en el catálogo, el detalle y el carrito.
+- Se muestran estados de carga y mensajes de error o de ausencia de productos.
+- La búsqueda y el filtro trabajan sobre los datos ya obtenidos de Firestore.
+- Se valida la disponibilidad y el stock antes de agregar al carrito.
+
+### Compra y pedidos
+- "Confirmar compra" exige tener sesión iniciada; si no, redirige a "Mi perfil".
+- Antes de confirmar se consulta de nuevo el stock real en Firestore (no se confía
+  solo en lo validado al agregar al carrito). Si cambió, se avisa y se ajusta el
+  carrito.
+- La compra se registra mediante una **transacción de Firestore**: se lee el stock,
+  se valida, se descuenta el stock de cada producto (sin permitir valores negativos)
+  y se guarda el pedido en la colección `pedidos`, todo junto. Si algo falla, no se
+  aplica ningún cambio.
+- Si la compra se completa sin errores, el carrito (LocalStorage) se vacía.
+- En "Mi perfil" cada usuario ve únicamente sus propios pedidos (consulta filtrada
+  por `usuarioId`).
+
+  ### Valoraciones y comentarios
+- En el detalle de cada producto se pueden ver las valoraciones existentes.
+- Solo los usuarios con sesión iniciada pueden publicar una; se valida que la
+  puntuación esté entre 1 y 5 y que el comentario no esté vacío.
+- Cada valoración queda asociada al usuario autenticado que la publicó.
+
+## Modelo de datos en Firestore
+ 
+**`productos`** (el ID del documento coincide con el campo `id`, por ejemplo `p1`)
+`id`, `nombre`, `descripcion`, `categoria`, `precio`, `stock`, `disponibilidad`, `imagen`
+ 
+**`pedidos`**
+`usuarioId`, `usuarioCorreo`, `productos` (arreglo con `id`, `nombre`, `precio`,
+`cantidad`, `subtotal`), `total`, `fecha`, `estado`
+ 
+**`valoraciones`**
+`productoId`, `usuarioId`, `usuarioCorreo`, `puntuacion`, `comentario`, `fecha`
+ 
+## Qué información se guarda en LocalStorage
+Una única clave, `bytenova_carrito`, con un arreglo de objetos `{ id, cantidad }`
+(JSON). Solo se guarda el identificador del producto y la cantidad; el resto de los
+datos se obtiene de Firestore al mostrarlos. El carrito se vacía al completar una
+compra.
+
+## Organización de archivos
+index.html, catalogo.html, producto.html, carrito.html, perfil.html, admin.html
+CSS/
+  estilos.css
+assets/
+  productos/           → imágenes de los productos
+js/
+  firebase/
+    config.js          → inicialización de Firebase (app, auth, db)
+    productos.js       → obtiene los productos desde Firestore
+  sesion.js            → mantiene la sesión y actualiza el navbar (todas las páginas)
+  perfil.js            → registro, inicio/cierre de sesión y "Mis pedidos"
+  catalogo.js          → catálogo, búsqueda y filtros
+  producto.js          → detalle del producto y valoraciones
+  carrito.js           → carrito, confirmación de compra, pedidos y stock
+```
+ 
+## Reglas de seguridad de Firestore
+- `productos`: lectura pública; un usuario autenticado solo puede modificar el campo
+  `stock` (nunca a un valor negativo). No se pueden crear ni borrar desde la web.
+- `pedidos`: solo se pueden crear con el `usuarioId` propio y solo los lee su dueño.
+- `valoraciones`: lectura pública; se crean solo con el `usuarioId` propio,
+  puntuación de 1 a 5 y comentario no vacío.
 
 ## Decisiones de diseño adoptadas
 - Paleta de color basada en un azul noche (`#0F172A`) como color principal,
