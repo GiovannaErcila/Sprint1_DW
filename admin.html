@@ -32,7 +32,7 @@
           <li class="nav-item"><a class="nav-link " href="producto.html">Producto</a></li>
           <li class="nav-item"><a class="nav-link " href="carrito.html">Carrito</a></li>
           <li class="nav-item"><a class="nav-link " href="perfil.html">Mi perfil</a></li>
-          <li class="nav-item"><a class="nav-link active" href="admin.html">Administración</a></li>
+          <li class="nav-item d-none" id="nav-admin-item"><a class="nav-link " href="admin.html">Administración</a></li>
         </ul>
 
         <div class="d-flex align-items-center gap-3">
@@ -49,17 +49,16 @@
     </div>
   </nav>
 </header>
-  <main class="en-desarrollo">
-    <div class="container">
-      <div class="icono">⚙️</div>
-      <h1 class="h3 mb-3">Panel administrativo en desarrollo</h1>
-      <p class="text-muted mb-4">El panel de administración con operaciones CRUD sobre Cloud Firestore se desarrollará en etapas avanzadas del proyecto.</p>
-      <span class="badge bg-primary-subtle text-primary px-3 py-2">Disponible desde el Sprint 4</span>
-      <div class="mt-4">
-        <a href="index.html" class="btn btn-bn-primary">Volver al inicio</a>
-      </div>
+ <main class="admin-page">
+  <div class="container py-5">
+    <p id="admin-verificando" class="text-muted text-center">Verificando permisos...</p>
+
+    <div id="admin-contenido" class="d-none">
+      <h1 class="h3 mb-3">Panel de administración</h1>
+      <p class="text-muted">Sesión de administración verificada. La gestión de productos se agrega en los próximos días.</p>
     </div>
-  </main>
+  </div>
+</main>
 
   <footer class="footer-bytenova">
     <div class="container">
@@ -113,6 +112,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="js/admin.js"></script>
   <script type="module" src="js/sesion.js"></script>
 </body>
 </html>
