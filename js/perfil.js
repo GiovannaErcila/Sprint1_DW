@@ -1,8 +1,4 @@
 // js/perfil.js
-// Día 2: registro de usuarios.
-// Día 3: inicio y cierre de sesión, con mensajes de error traducidos.
-// Día 4: el panel de "sesión iniciada" ahora reacciona a onAuthStateChanged,
-// así que se mantiene correcto también al recargar la página.
 
 import { auth, db } from "./firebase/config.js";
 import {
@@ -17,6 +13,8 @@ import {
   where,
   orderBy,
   getDocs,
+  doc,
+  setDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const formRegistro = document.getElementById("form-registro");
@@ -34,7 +32,6 @@ const pedidosCargando = document.getElementById("pedidos-cargando");
 const pedidosVacio = document.getElementById("pedidos-vacio");
 const listaPedidos = document.getElementById("lista-pedidos");
 
-// --- Utilidades compartidas --------------------------------------------
 
 function mostrarMensaje(elemento, texto, tipo) {
   elemento.textContent = texto;
@@ -67,8 +64,6 @@ function mostrarFormularios() {
   contenedorFormularios.classList.remove("d-none");
   panelSesion.classList.add("d-none");
 }
-
-// --- Mis pedidos (Día 11): solo los del usuario autenticado, filtrando por uid ---
 
 async function cargarPedidosUsuario(uid) {
   pedidosCargando.classList.remove("d-none");
@@ -120,8 +115,6 @@ async function cargarPedidosUsuario(uid) {
   }
 }
 
-// --- Mantener la vista sincronizada con el estado real de la sesión -----
-// (Día 4: esto reemplaza el toggle manual que hacíamos ayer al loguearse)
 
 onAuthStateChanged(auth, (usuario) => {
   if (usuario) {
@@ -132,7 +125,6 @@ onAuthStateChanged(auth, (usuario) => {
   }
 });
 
-// --- Registro (Día 2) ---------------------------------------------------
 
 function validarRegistro(nombre, correo, contrasena) {
   if (!nombre || !correo || !contrasena) {
@@ -168,7 +160,15 @@ formRegistro.addEventListener("submit", async (evento) => {
   botonRegistro.disabled = true;
 
   try {
-    await createUserWithEmailAndPassword(auth, correo, contrasena);
+    const credencial = await createUserWithEmailAndPassword(auth, correo, contrasena);
+
+
+    await setDoc(doc(db, "usuarios", credencial.user.uid), {
+      nombre,
+      email: credencial.user.email,
+      rol: "cliente",
+    });
+
     mostrarMensaje(mensajeRegistro, "Cuenta creada correctamente. Ya podés iniciar sesión.", "exito");
     formRegistro.reset();
   } catch (error) {
@@ -178,9 +178,6 @@ formRegistro.addEventListener("submit", async (evento) => {
   }
 });
 
-// --- Inicio y cierre de sesión (Día 3) -----------------------------------
-// Ya no necesitan cambiar la vista manualmente: onAuthStateChanged (arriba)
-// se encarga apenas Firebase confirma el login o logout.
 
 formLogin.addEventListener("submit", async (evento) => {
   evento.preventDefault();

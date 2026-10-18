@@ -110,7 +110,6 @@ export function eliminarDelCarrito(idProducto) {
   renderizarCarrito();
 }
 
-// --- Render (Solo ejecuta en carrito.html) --------------------------------
 
 const contenedorCarrito = document.getElementById("carrito-items");
 const mensajeCarritoVacio = document.getElementById("carrito-vacio");
@@ -177,10 +176,6 @@ export async function renderizarCarrito() {
   }
 }
 
-// --- Confirmar compra: valida sesión y stock real en Firestore (Día 9) -----
-
-// Consulta Firestore DE NUEVO para cada producto del carrito (no confía en
-// productosCache, que pudo quedar desactualizado desde que se agregó).
 async function verificarStockActual(carrito) {
   const problemas = [];
 
@@ -206,8 +201,6 @@ async function verificarStockActual(carrito) {
   return problemas;
 }
 
-// Si algún producto ya no tiene el stock que el carrito suponía, ajusta las
-// cantidades (o lo elimina si quedó en 0) para que el carrito sea honesto.
 function ajustarCarritoAStockReal(problemas) {
   let carrito = obtenerCarrito();
 
@@ -223,10 +216,6 @@ function ajustarCarritoAStockReal(problemas) {
   guardarCarrito(carrito);
 }
 
-// --- Registrar el pedido y descontar stock, todo junto (Día 10) -----------
-// Usamos una transacción: primero lee el stock real de cada producto, valida
-// que alcance, y recién ahí escribe el pedido y descuenta el stock. Si algo
-// falla en el medio, Firestore no aplica ninguno de los cambios.
 async function registrarPedido(carrito, usuario) {
   const pedidoRef = doc(collection(db, "pedidos"));
 
