@@ -54,6 +54,45 @@
     <p id="admin-verificando" class="text-muted text-center">Verificando permisos...</p>
 
     <div id="admin-contenido" class="d-none">
+      <h1 class="h3 mb-4">Panel de administración</h1>
+
+      <div class="row g-4">
+        <section class="col-lg-8" aria-labelledby="titulo-productos">
+          <h2 class="h5 mb-3" id="titulo-productos">Productos</h2>
+
+          <p id="admin-productos-cargando" class="text-muted">Cargando productos...</p>
+          <p id="admin-productos-error" class="text-danger d-none"></p>
+
+          <div class="table-responsive">
+            <table id="tabla-productos" class="table table-hover align-middle d-none">
+              <thead>
+                <tr>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Categoría</th>
+                  <th scope="col" class="text-end">Precio</th>
+                  <th scope="col" class="text-end">Stock</th>
+                  <th scope="col">Disponibilidad</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-productos-cuerpo"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="col-lg-4" aria-labelledby="titulo-formulario">
+          <h2 class="h5 mb-3" id="titulo-formulario">Nuevo producto</h2>
+          <div id="admin-formulario" class="border rounded p-3 bg-white text-muted small">
+            Acá va el formulario para crear y editar productos.
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+  <div class="container py-5">
+    <p id="admin-verificando" class="text-muted text-center">Verificando permisos...</p>
+
+    <div id="admin-contenido" class="d-none">
       <h1 class="h3 mb-3">Panel de administración</h1>
       <p class="text-muted">Sesión de administración verificada. La gestión de productos se agrega en los próximos días.</p>
     </div>
