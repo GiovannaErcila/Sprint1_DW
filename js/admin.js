@@ -1,7 +1,12 @@
 // js/admin.js
 
-import { auth } from "./firebase/config.js";
+import { auth, db } from "./firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  collection,
+  doc,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { obtenerRol } from "./firebase/roles.js";
 import { obtenerProductosFirestore } from "./firebase/productos.js";
 
@@ -12,6 +17,12 @@ const productosCargando = document.getElementById("admin-productos-cargando");
 const productosError = document.getElementById("admin-productos-error");
 const tabla = document.getElementById("tabla-productos");
 const tablaCuerpo = document.getElementById("tabla-productos-cuerpo");
+
+const formProducto = document.getElementById("form-producto");
+const mensajeProducto = document.getElementById("mensaje-producto");
+const listaCategorias = document.getElementById("lista-categorias");
+
+const IMAGEN_POR_DEFECTO = "assets/placeholder.jpg";
 
 // --- Listado de productos ---------------------------------------
 
@@ -49,6 +60,17 @@ function renderizarTabla(productos) {
   });
 }
 
+// Ofrece las categorías que ya existen como sugerencia en el formulario.
+function actualizarCategorias(productos) {
+  const categorias = [...new Set(productos.map((p) => p.categoria).filter(Boolean))];
+  listaCategorias.innerHTML = "";
+  categorias.forEach((categoria) => {
+    const opcion = document.createElement("option");
+    opcion.value = categoria;
+    listaCategorias.appendChild(opcion);
+  });
+}
+
 async function cargarListaProductos() {
   productosCargando.classList.remove("d-none");
   productosError.classList.add("d-none");
@@ -66,6 +88,7 @@ async function cargarListaProductos() {
 
     productos.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
     renderizarTabla(productos);
+    actualizarCategorias(productos);
     tabla.classList.remove("d-none");
   } catch (error) {
     console.error("Error al obtener los productos:", error);
@@ -75,7 +98,105 @@ async function cargarListaProductos() {
   }
 }
 
-// --- Protección de la página -----
+// --- Crear producto -----------------------------------------------
+
+function mostrarMensaje(texto, tipo) {
+  mensajeProducto.textContent = texto;
+  mensajeProducto.classList.remove("text-danger", "text-success");
+  if (texto) mensajeProducto.classList.add(tipo === "error" ? "text-danger" : "text-success");
+}
+
+function leerFormulario() {
+  return {
+    nombre: document.getElementById("prod-nombre").value.trim(),
+    categoria: document.getElementById("prod-categoria").value.trim(),
+    precioTexto: document.getElementById("prod-precio").value.trim(),
+    stockTexto: document.getElementById("prod-stock").value.trim(),
+    descripcion: document.getElementById("prod-descripcion").value.trim(),
+    imagen: document.getElementById("prod-imagen").value.trim(),
+    disponibilidad: document.getElementById("prod-disponibilidad").checked,
+  };
+}
+
+// Devuelve { campo, mensaje } con el primer problema, o null si todo está bien.
+function validarProducto(datos) {
+  if (!datos.nombre) {
+    return { campo: "prod-nombre", mensaje: "Ingresá el nombre del producto." };
+  }
+
+  if (!datos.categoria) {
+    return { campo: "prod-categoria", mensaje: "Ingresá la categoría del producto." };
+  }
+
+  // Se controla el texto vacío aparte porque Number("") da 0.
+  const precio = Number(datos.precioTexto);
+  if (datos.precioTexto === "" || !Number.isFinite(precio)) {
+    return { campo: "prod-precio", mensaje: "Ingresá un precio válido (un número)." };
+  }
+  if (precio < 0) {
+    return { campo: "prod-precio", mensaje: "El precio no puede ser negativo." };
+  }
+
+  const stock = Number(datos.stockTexto);
+  if (datos.stockTexto === "" || !Number.isFinite(stock)) {
+    return { campo: "prod-stock", mensaje: "Ingresá el stock (un número)." };
+  }
+  if (!Number.isInteger(stock)) {
+    return { campo: "prod-stock", mensaje: "El stock tiene que ser un número entero." };
+  }
+  if (stock < 0) {
+    return { campo: "prod-stock", mensaje: "El stock no puede ser negativo." };
+  }
+
+  return null;
+}
+
+formProducto.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  mostrarMensaje("", "exito");
+
+  const datos = leerFormulario();
+  const problema = validarProducto(datos);
+  if (problema) {
+    mostrarMensaje(problema.mensaje, "error");
+    document.getElementById(problema.campo).focus();
+    return;
+  }
+
+  const boton = formProducto.querySelector("button[type='submit']");
+  const textoOriginal = boton.textContent;
+  boton.disabled = true;
+  boton.textContent = "Guardando...";
+
+  try {
+    // Se genera primero la referencia para conocer el ID del documento y
+    // guardarlo también en el campo "id" (el catálogo y el detalle usan ese campo).
+    const referencia = doc(collection(db, "productos"));
+
+    await setDoc(referencia, {
+      id: referencia.id,
+      nombre: datos.nombre,
+      categoria: datos.categoria,
+      precio: Number(datos.precioTexto),
+      stock: Number(datos.stockTexto),
+      descripcion: datos.descripcion,
+      imagen: datos.imagen || IMAGEN_POR_DEFECTO,
+      disponibilidad: datos.disponibilidad,
+    });
+
+    formProducto.reset();
+    mostrarMensaje(`Producto "${datos.nombre}" creado correctamente.`, "exito");
+    await cargarListaProductos();
+  } catch (error) {
+    console.error("Error al crear el producto:", error);
+    mostrarMensaje("No se pudo guardar el producto. Revisá tu conexión y tus permisos.", "error");
+  } finally {
+    boton.disabled = false;
+    boton.textContent = textoOriginal;
+  }
+});
+
+// --- Protección de la página -------------------------------------
 
 onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) {
