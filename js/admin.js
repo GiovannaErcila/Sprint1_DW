@@ -6,6 +6,7 @@ import {
   collection,
   doc,
   setDoc,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { obtenerRol } from "./firebase/roles.js";
 import { obtenerProductosFirestore } from "./firebase/productos.js";
@@ -18,13 +19,20 @@ const productosError = document.getElementById("admin-productos-error");
 const tabla = document.getElementById("tabla-productos");
 const tablaCuerpo = document.getElementById("tabla-productos-cuerpo");
 
+const tituloFormulario = document.getElementById("titulo-formulario");
 const formProducto = document.getElementById("form-producto");
+const botonGuardar = formProducto.querySelector("button[type='submit']");
+const botonCancelar = document.getElementById("btn-cancelar-edicion");
 const mensajeProducto = document.getElementById("mensaje-producto");
 const listaCategorias = document.getElementById("lista-categorias");
 
 const IMAGEN_POR_DEFECTO = "assets/placeholder.jpg";
 
-// --- Listado de productos ---------------------------------------
+// Productos cargados en pantalla y, si se está editando uno, su ID.
+let productosActuales = [];
+let idEnEdicion = null;
+
+// --- Listado de productos  ---------------------------------------
 
 // Crea una celda con texto plano (textContent): los datos de Firestore nunca
 // se interpretan como HTML.
@@ -46,16 +54,34 @@ function crearCeldaDisponibilidad(disponible) {
   return celda;
 }
 
-function renderizarTabla(productos) {
+function crearCeldaAcciones(producto) {
+  const celda = document.createElement("td");
+  celda.className = "text-end";
+
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.className = "btn btn-sm btn-outline-primary";
+  boton.textContent = "Editar";
+  boton.setAttribute("aria-label", `Editar ${producto.nombre}`);
+  boton.addEventListener("click", () => iniciarEdicion(producto));
+
+  celda.appendChild(boton);
+  return celda;
+}
+
+function renderizarTabla() {
   tablaCuerpo.innerHTML = "";
 
-  productos.forEach((producto) => {
+  productosActuales.forEach((producto) => {
     const fila = document.createElement("tr");
+    if (producto.id === idEnEdicion) fila.classList.add("table-active");
+
     fila.appendChild(crearCelda(producto.nombre));
     fila.appendChild(crearCelda(producto.categoria));
     fila.appendChild(crearCelda(`$${Number(producto.precio).toLocaleString("es-UY")}`, "text-end"));
     fila.appendChild(crearCelda(producto.stock, "text-end"));
     fila.appendChild(crearCeldaDisponibilidad(Boolean(producto.disponibilidad)));
+    fila.appendChild(crearCeldaAcciones(producto));
     tablaCuerpo.appendChild(fila);
   });
 }
@@ -81,13 +107,15 @@ async function cargarListaProductos() {
     productosCargando.classList.add("d-none");
 
     if (!productos || productos.length === 0) {
+      productosActuales = [];
       productosError.textContent = "Todavía no hay productos cargados.";
       productosError.classList.remove("d-none");
       return;
     }
 
     productos.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
-    renderizarTabla(productos);
+    productosActuales = productos;
+    renderizarTabla();
     actualizarCategorias(productos);
     tabla.classList.remove("d-none");
   } catch (error) {
@@ -98,12 +126,20 @@ async function cargarListaProductos() {
   }
 }
 
-// --- Crear producto -----------------------------------------------
+// --- Formulario: crear  y editar --------------------------
 
 function mostrarMensaje(texto, tipo) {
   mensajeProducto.textContent = texto;
   mensajeProducto.classList.remove("text-danger", "text-success");
   if (texto) mensajeProducto.classList.add(tipo === "error" ? "text-danger" : "text-success");
+}
+
+// Ajusta el título y los botones según se esté creando o editando.
+function actualizarTextosFormulario() {
+  const editando = idEnEdicion !== null;
+  tituloFormulario.textContent = editando ? "Editar producto" : "Nuevo producto";
+  botonGuardar.textContent = editando ? "Guardar cambios" : "Crear producto";
+  botonCancelar.classList.toggle("d-none", !editando);
 }
 
 function leerFormulario() {
@@ -151,6 +187,40 @@ function validarProducto(datos) {
   return null;
 }
 
+// Carga los datos de un producto en el formulario para editarlo.
+function iniciarEdicion(producto) {
+  idEnEdicion = producto.id;
+
+  document.getElementById("prod-nombre").value = producto.nombre ?? "";
+  document.getElementById("prod-categoria").value = producto.categoria ?? "";
+  document.getElementById("prod-precio").value = producto.precio ?? "";
+  document.getElementById("prod-stock").value = producto.stock ?? "";
+  document.getElementById("prod-descripcion").value = producto.descripcion ?? "";
+  document.getElementById("prod-imagen").value = producto.imagen ?? "";
+  document.getElementById("prod-disponibilidad").checked = Boolean(producto.disponibilidad);
+
+  mostrarMensaje("", "exito");
+  actualizarTextosFormulario();
+  renderizarTabla();
+
+  // En el teléfono el formulario queda debajo de la tabla: se lo acerca a la vista.
+  formProducto.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("prod-nombre").focus();
+}
+
+// Vuelve el formulario al modo "crear".
+function salirDeEdicion() {
+  idEnEdicion = null;
+  formProducto.reset();
+  actualizarTextosFormulario();
+  renderizarTabla();
+}
+
+botonCancelar.addEventListener("click", () => {
+  mostrarMensaje("", "exito");
+  salirDeEdicion();
+});
+
 formProducto.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   mostrarMensaje("", "exito");
@@ -163,18 +233,13 @@ formProducto.addEventListener("submit", async (evento) => {
     return;
   }
 
-  const boton = formProducto.querySelector("button[type='submit']");
-  const textoOriginal = boton.textContent;
-  boton.disabled = true;
-  boton.textContent = "Guardando...";
+  const editando = idEnEdicion !== null;
+  botonGuardar.disabled = true;
+  botonCancelar.disabled = true;
+  botonGuardar.textContent = "Guardando...";
 
   try {
-    // Se genera primero la referencia para conocer el ID del documento y
-    // guardarlo también en el campo "id" (el catálogo y el detalle usan ese campo).
-    const referencia = doc(collection(db, "productos"));
-
-    await setDoc(referencia, {
-      id: referencia.id,
+    const campos = {
       nombre: datos.nombre,
       categoria: datos.categoria,
       precio: Number(datos.precioTexto),
@@ -182,17 +247,30 @@ formProducto.addEventListener("submit", async (evento) => {
       descripcion: datos.descripcion,
       imagen: datos.imagen || IMAGEN_POR_DEFECTO,
       disponibilidad: datos.disponibilidad,
-    });
+    };
 
-    formProducto.reset();
-    mostrarMensaje(`Producto "${datos.nombre}" creado correctamente.`, "exito");
+    if (editando) {
+      // El campo "id" no se toca: sigue igual al ID del documento.
+      await updateDoc(doc(db, "productos", idEnEdicion), campos);
+      salirDeEdicion();
+      mostrarMensaje(`Producto "${datos.nombre}" actualizado correctamente.`, "exito");
+    } else {
+      // Se genera primero la referencia para conocer el ID del documento y
+      // guardarlo también en el campo "id" (el catálogo y el detalle usan ese campo).
+      const referencia = doc(collection(db, "productos"));
+      await setDoc(referencia, { id: referencia.id, ...campos });
+      formProducto.reset();
+      mostrarMensaje(`Producto "${datos.nombre}" creado correctamente.`, "exito");
+    }
+
     await cargarListaProductos();
   } catch (error) {
-    console.error("Error al crear el producto:", error);
+    console.error("Error al guardar el producto:", error);
     mostrarMensaje("No se pudo guardar el producto. Revisá tu conexión y tus permisos.", "error");
   } finally {
-    boton.disabled = false;
-    boton.textContent = textoOriginal;
+    botonGuardar.disabled = false;
+    botonCancelar.disabled = false;
+    actualizarTextosFormulario();
   }
 });
 
