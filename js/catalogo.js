@@ -65,7 +65,7 @@ function aplicarFiltros() {
   renderizarCatalogo(filtrados);
 }
 
-// Renderiza las tarjetas de productos
+// Renderiza las tarjetas de productos.
 function renderizarCatalogo(lista) {
   if (!contenedorCatalogo) return;
 
@@ -82,7 +82,27 @@ function renderizarCatalogo(lista) {
     const col = document.createElement("div");
     col.className = "col-12 col-md-6 col-lg-4 mb-4";
 
+    const disponible = Boolean(prod.disponibilidad);
     const tieneStock = prod.stock > 0;
+    const comprable = disponible && tieneStock;
+
+    let textoEstado;
+    let claseEstado;
+    let textoBoton;
+
+    if (!disponible) {
+      textoEstado = "No disponible por el momento";
+      claseEstado = "text-secondary";
+      textoBoton = "No disponible";
+    } else if (tieneStock) {
+      textoEstado = `Stock disponible: ${prod.stock}`;
+      claseEstado = "text-success";
+      textoBoton = "Agregar";
+    } else {
+      textoEstado = "Sin stock disponible";
+      claseEstado = "text-danger";
+      textoBoton = "Agotado";
+    }
 
     col.innerHTML = `
       <div class="card h-100 shadow-sm">
@@ -90,17 +110,15 @@ function renderizarCatalogo(lista) {
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">${prod.nombre}</h5>
           <p class="card-text text-muted small mb-2">${prod.categoria || 'Sin categoría'}</p>
-          <p class="fw-bold fs-5 text-primary">$${prod.precio}</p>
-          <p class="small ${tieneStock ? 'text-success' : 'text-danger'} mb-3">
-            ${tieneStock ? `Stock disponible: ${prod.stock}` : 'Sin stock disponible'}
-          </p>
+          <p class="fw-bold fs-5 text-primary">$${Number(prod.precio).toLocaleString("es-UY")}</p>
+          <p class="small ${claseEstado} mb-3">${textoEstado}</p>
           <div class="mt-auto d-flex gap-2">
             <a href="producto.html?id=${prod.id}" class="btn btn-outline-secondary btn-sm flex-fill">Ver detalle</a>
-            <button 
-              class="btn btn-bn-primary btn-sm flex-fill btn-agregar" 
+            <button
+              class="btn btn-bn-primary btn-sm flex-fill btn-agregar"
               data-id="${prod.id}"
-              ${!tieneStock ? 'disabled' : ''}>
-              ${tieneStock ? 'Agregar' : 'Agotado'}
+              ${comprable ? "" : "disabled"}>
+              ${textoBoton}
             </button>
           </div>
         </div>
@@ -113,17 +131,13 @@ function renderizarCatalogo(lista) {
   // Evento para agregar al carrito
   document.querySelectorAll(".btn-agregar").forEach((boton) => {
     boton.addEventListener("click", (e) => {
-      const idProd = e.target.getAttribute("data-id");
+      const idProd = e.currentTarget.getAttribute("data-id");
       const prodSeleccionado = productosGlobales.find((p) => p.id === idProd);
+      if (!prodSeleccionado) return;
 
-      if (prodSeleccionado && prodSeleccionado.stock > 0) {
-        const agregado = agregarAlCarrito(prodSeleccionado.id, 1);
-         if (!agregado) {
-           alert(`Ya tenés el stock máximo de "${prodSeleccionado.nombre}" en el carrito.`);
-  }
-        agregarAlCarrito(prodSeleccionado);
-      } else {
-        alert("El producto no tiene stock disponible.");
+      const agregado = agregarAlCarrito(prodSeleccionado.id, 1);
+      if (!agregado) {
+        alert(`No se puede agregar más de "${prodSeleccionado.nombre}": ya tenés todas las unidades disponibles en tu carrito.`);
       }
     });
   });

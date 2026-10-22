@@ -47,6 +47,19 @@ function obtenerIdDesdeUrl() {
 
 // Renderizar la información detallada del producto
 function renderizarDetalleProducto(producto) {
+  // Solo se puede comprar si el administrador lo dejó disponible y hay stock.
+  const disponible = Boolean(producto.disponibilidad);
+  const comprable = disponible && producto.stock > 0;
+
+  let textoStock;
+  if (!disponible) {
+    textoStock = "Este producto no está disponible por el momento.";
+  } else if (producto.stock > 0) {
+    textoStock = `Stock disponible: ${producto.stock} unidades`;
+  } else {
+    textoStock = "Sin stock disponible.";
+  }
+
   contenedorDetalle.innerHTML = `
     <div class="row align-items-center g-4">
       <div class="col-md-6 text-center">
@@ -57,11 +70,11 @@ function renderizarDetalleProducto(producto) {
         <h1 class="h2 fw-bold mb-3">${producto.nombre}</h1>
         <p class="text-muted mb-4">${producto.descripcion || "Sin descripción disponible."}</p>
         <h3 class="fw-bold text-primary mb-3">$${producto.precio.toLocaleString("es-UY")}</h3>
-        <p class="mb-4"><small class="text-muted">Stock disponible: ${producto.stock} unidades</small></p>
+        <p class="mb-4"><small class="${comprable ? "text-muted" : "text-danger"}">${textoStock}</small></p>
 
         <div class="d-flex align-items-center gap-3">
-          <button id="btn-agregar-detalle" class="btn btn-bn-primary btn-lg">
-            <i class="bi bi-cart-plus me-1"></i> Agregar al carrito
+          <button id="btn-agregar-detalle" class="btn btn-bn-primary btn-lg" ${comprable ? "" : "disabled"}>
+            <i class="bi bi-cart-plus me-1"></i> ${comprable ? "Agregar al carrito" : "No disponible"}
           </button>
           <a href="catalogo.html" class="btn btn-outline-secondary btn-lg">Volver al catálogo</a>
         </div>
@@ -82,11 +95,11 @@ function renderizarDetalleProducto(producto) {
         btnAgregar.classList.replace("btn-success", "btn-bn-primary");
       }, 1500);
     } else {
-      alert(`Ya tenés la cantidad máxima en stock (${producto.stock}) de "${producto.nombre}" en tu carrito.`);
+      alert(`No se puede agregar más de "${producto.nombre}": ya tenés todas las unidades disponibles en tu carrito.`);
     }
   });
 
-  // --- Valoraciones (Día 11) ---
+  // Valoraciones.
   productoActual = producto;
   seccionValoraciones.classList.remove("d-none");
   actualizarVistaFormularioValoracion();
@@ -98,7 +111,7 @@ function mostrarNoEncontrado() {
   mensajeNoEncontrado.classList.remove("d-none");
 }
 
-// --- Valoraciones y comentarios (Día 11) ----------------------------------
+// Valoraciones y comentarios.
 
 function actualizarVistaFormularioValoracion() {
   if (usuarioActual) {
@@ -202,7 +215,7 @@ formValoracion.addEventListener("submit", async (evento) => {
   }
 });
 
-// --- Carga inicial del producto -------------------------------------------
+// Carga inicial del producto.
 
 async function cargarProducto() {
   const idProducto = obtenerIdDesdeUrl();

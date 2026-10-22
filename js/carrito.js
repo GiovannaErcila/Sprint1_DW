@@ -21,7 +21,7 @@ onAuthStateChanged(auth, (usuario) => {
   usuarioActual = usuario;
 });
 
-// --- Persistencia en LocalStorage --------------------------------------
+// Persistencia en LocalStorage.
 
 export function obtenerCarrito() {
   const datos = localStorage.getItem(CLAVE_CARRITO);
@@ -55,12 +55,15 @@ export function establecerProductosCarrito(productos) {
   productosCache = productos;
 }
 
-// --- Operaciones sobre el carrito ---------------------------------------
+// Operaciones sobre el carrito.
 
 export function agregarAlCarrito(idProducto, cantidad = 1) {
   const carrito = obtenerCarrito();
   const producto = productosCache.find((p) => p.id === idProducto);
   if (!producto) return false;
+
+  // Un producto marcado como no disponible por el administrador no se agrega.
+  if (!producto.disponibilidad) return false;
 
   const item = carrito.find((i) => i.id === idProducto);
   const cantidadActual = item ? item.cantidad : 0;
@@ -110,6 +113,7 @@ export function eliminarDelCarrito(idProducto) {
   renderizarCarrito();
 }
 
+// Render (Solo ejecuta en carrito.html) 
 
 const contenedorCarrito = document.getElementById("carrito-items");
 const mensajeCarritoVacio = document.getElementById("carrito-vacio");
@@ -176,6 +180,9 @@ export async function renderizarCarrito() {
   }
 }
 
+// Confirmar compra: valida sesión y stock real en Firestore
+
+// Consulta Firestore DE NUEVO para cada producto del carrito.
 async function verificarStockActual(carrito) {
   const problemas = [];
 
@@ -188,6 +195,19 @@ async function verificarStockActual(carrito) {
     }
 
     const datos = snap.data();
+
+    // El administrador pudo marcarlo como no disponible después de que se agregó.
+    if (!datos.disponibilidad) {
+      problemas.push({
+        id: item.id,
+        nombre: datos.nombre,
+        stockActual: 0,
+        cantidadEnCarrito: item.cantidad,
+        noDisponible: true,
+      });
+      continue;
+    }
+
     if (item.cantidad > datos.stock) {
       problemas.push({
         id: item.id,
@@ -201,6 +221,8 @@ async function verificarStockActual(carrito) {
   return problemas;
 }
 
+// Si algún producto ya no tiene el stock que el carrito suponía, ajusta las
+// cantidades (o lo elimina si quedó en 0) para que el carrito sea honesto.
 function ajustarCarritoAStockReal(problemas) {
   let carrito = obtenerCarrito();
 
@@ -216,6 +238,10 @@ function ajustarCarritoAStockReal(problemas) {
   guardarCarrito(carrito);
 }
 
+// Registrar el pedido y descontar stock, todo junto.
+// Usamos una transacción: primero lee el stock real de cada producto, valida
+// que alcance, y recién ahí escribe el pedido y descuenta el stock. Si algo
+// falla en el medio, Firestore no aplica ninguno de los cambios.
 async function registrarPedido(carrito, usuario) {
   const pedidoRef = doc(collection(db, "pedidos"));
 
@@ -234,6 +260,9 @@ async function registrarPedido(carrito, usuario) {
 
     // 2. Validar que haya stock suficiente para TODOS antes de escribir nada
     for (const { item, datos } of lecturas) {
+      if (!datos.disponibilidad) {
+        throw new Error(`"${datos.nombre}" ya no está disponible.`);
+      }
       if (item.cantidad > datos.stock) {
         throw new Error(`No hay stock suficiente de "${datos.nombre}".`);
       }
@@ -296,10 +325,14 @@ if (btnConfirmarCompra) {
 
       if (problemas.length > 0) {
         const detalle = problemas
-          .map((p) => `- ${p.nombre}: quedan ${p.stockActual} (tenías ${p.cantidadEnCarrito})`)
+          .map((p) =>
+            p.noDisponible
+              ? `- ${p.nombre}: ya no está disponible`
+              : `- ${p.nombre}: quedan ${p.stockActual} (tenías ${p.cantidadEnCarrito})`
+          )
           .join("\n");
         alert(
-          "Algunos productos cambiaron de stock desde que los agregaste al carrito:\n" + detalle
+          "Algunos productos cambiaron desde que los agregaste al carrito:\n" + detalle
         );
         ajustarCarritoAStockReal(problemas);
         renderizarCarrito();
@@ -323,7 +356,6 @@ if (btnConfirmarCompra) {
   });
 }
 
-// --- Inicialización automática al cargar el script -----------------------
 
 actualizarBadgeCarrito();
 
