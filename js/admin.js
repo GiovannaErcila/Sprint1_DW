@@ -32,19 +32,23 @@ const IMAGEN_POR_DEFECTO = "assets/placeholder.jpg";
 let productosActuales = [];
 let idEnEdicion = null;
 
-// --- Listado de productos  ---------------------------------------
+// Listado de productos.
 
 // Crea una celda con texto plano (textContent): los datos de Firestore nunca
 // se interpretan como HTML.
-function crearCelda(texto, clase) {
+// "etiqueta" se usa en pantallas chicas, donde cada fila se muestra como una
+// tarjeta y cada dato necesita su título.
+function crearCelda(texto, clase, etiqueta) {
   const celda = document.createElement("td");
   celda.textContent = texto;
   if (clase) celda.className = clase;
+  if (etiqueta) celda.dataset.label = etiqueta;
   return celda;
 }
 
 function crearCeldaDisponibilidad(disponible) {
   const celda = document.createElement("td");
+  celda.dataset.label = "Disponibilidad";
   const etiqueta = document.createElement("span");
   etiqueta.className = disponible
     ? "badge bg-success-subtle text-success"
@@ -76,10 +80,10 @@ function renderizarTabla() {
     const fila = document.createElement("tr");
     if (producto.id === idEnEdicion) fila.classList.add("table-active");
 
-    fila.appendChild(crearCelda(producto.nombre));
-    fila.appendChild(crearCelda(producto.categoria));
-    fila.appendChild(crearCelda(`$${Number(producto.precio).toLocaleString("es-UY")}`, "text-end"));
-    fila.appendChild(crearCelda(producto.stock, "text-end"));
+    fila.appendChild(crearCelda(producto.nombre, "fw-semibold", "Nombre"));
+    fila.appendChild(crearCelda(producto.categoria, "", "Categoría"));
+    fila.appendChild(crearCelda(`$${Number(producto.precio).toLocaleString("es-UY")}`, "text-end", "Precio"));
+    fila.appendChild(crearCelda(producto.stock, "text-end", "Stock"));
     fila.appendChild(crearCeldaDisponibilidad(Boolean(producto.disponibilidad)));
     fila.appendChild(crearCeldaAcciones(producto));
     tablaCuerpo.appendChild(fila);
@@ -126,7 +130,7 @@ async function cargarListaProductos() {
   }
 }
 
-// --- Formulario: crear  y editar --------------------------
+// Formulario: crear.
 
 function mostrarMensaje(texto, tipo) {
   mensajeProducto.textContent = texto;
@@ -141,6 +145,16 @@ function actualizarTextosFormulario() {
   botonGuardar.textContent = editando ? "Guardar cambios" : "Crear producto";
   botonCancelar.classList.toggle("d-none", !editando);
 }
+
+// Quita el borde rojo de los campos marcados como inválidos.
+function limpiarMarcasDeError() {
+  formProducto.querySelectorAll(".is-invalid").forEach((campo) => campo.classList.remove("is-invalid"));
+}
+
+// Al volver a escribir en un campo marcado, se le quita la marca.
+formProducto.addEventListener("input", (evento) => {
+  evento.target.classList.remove("is-invalid");
+});
 
 function leerFormulario() {
   return {
@@ -187,9 +201,21 @@ function validarProducto(datos) {
   return null;
 }
 
+// Convierte el error técnico de Firestore en un mensaje comprensible.
+function traducirErrorGuardado(error) {
+  if (error.code === "permission-denied") {
+    return "No tenés permisos para guardar productos. Iniciá sesión con una cuenta de administrador.";
+  }
+  if (error.code === "unavailable") {
+    return "No hay conexión con el servidor. Revisá tu internet e intentá de nuevo.";
+  }
+  return "No se pudo guardar el producto. Intentá de nuevo.";
+}
+
 // Carga los datos de un producto en el formulario para editarlo.
 function iniciarEdicion(producto) {
   idEnEdicion = producto.id;
+  limpiarMarcasDeError();
 
   document.getElementById("prod-nombre").value = producto.nombre ?? "";
   document.getElementById("prod-categoria").value = producto.categoria ?? "";
@@ -212,6 +238,7 @@ function iniciarEdicion(producto) {
 function salirDeEdicion() {
   idEnEdicion = null;
   formProducto.reset();
+  limpiarMarcasDeError();
   actualizarTextosFormulario();
   renderizarTabla();
 }
@@ -225,11 +252,14 @@ formProducto.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   mostrarMensaje("", "exito");
 
+  limpiarMarcasDeError();
   const datos = leerFormulario();
   const problema = validarProducto(datos);
   if (problema) {
     mostrarMensaje(problema.mensaje, "error");
-    document.getElementById(problema.campo).focus();
+    const campoConProblema = document.getElementById(problema.campo);
+    campoConProblema.classList.add("is-invalid");
+    campoConProblema.focus();
     return;
   }
 
@@ -266,7 +296,7 @@ formProducto.addEventListener("submit", async (evento) => {
     await cargarListaProductos();
   } catch (error) {
     console.error("Error al guardar el producto:", error);
-    mostrarMensaje("No se pudo guardar el producto. Revisá tu conexión y tus permisos.", "error");
+    mostrarMensaje(traducirErrorGuardado(error), "error");
   } finally {
     botonGuardar.disabled = false;
     botonCancelar.disabled = false;
@@ -274,7 +304,7 @@ formProducto.addEventListener("submit", async (evento) => {
   }
 });
 
-// --- Protección de la página -------------------------------------
+// Protección de la página.
 
 onAuthStateChanged(auth, async (usuario) => {
   if (!usuario) {

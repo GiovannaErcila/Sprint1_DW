@@ -1,6 +1,6 @@
 /* =========================================================
    ByteNova · styles.css
-   Identidad visual personalizada — Sprint 1
+   Identidad visual personalizada 
    ========================================================= */
 
 :root {
@@ -370,4 +370,51 @@ input:focus-visible,
   height: 350px;
   object-position: center bottom;
   object-fit: cover;
+}
+
+/* ===== Panel de administración: tabla de productos en pantallas chicas ===== */
+/* En teléfonos cada producto se muestra como una tarjeta, así no hace falta
+   deslizar la tabla hacia los costados para llegar al botón "Editar". */
+@media (max-width: 575.98px) {
+  #tabla-productos thead {
+    display: none;
+  }
+
+  #tabla-productos,
+  #tabla-productos tbody,
+  #tabla-productos tr,
+  #tabla-productos td {
+    display: block;
+    width: 100%;
+  }
+
+  #tabla-productos tr {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.25rem;
+    background: #fff;
+  }
+
+  #tabla-productos td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border: 0;
+    padding: 0.25rem 0.75rem;
+    text-align: right;
+  }
+
+  #tabla-productos td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  /* La última celda (botón Editar) va a la derecha y sin título. */
+  #tabla-productos td:last-child {
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+  }
 }
