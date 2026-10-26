@@ -42,7 +42,6 @@ Firestore y Firebase Authentication en los siguientes sprints.
 - Se corrigieron rutas de la hoja de estilos que apuntaban mal (`css/styles.css` en
   vez de `CSS/estilos.css`) en varias páginas.
 
----
 
 ## Funcionalidades incorporadas en el Sprint 2
 Durante este sprint se le dio comportamiento dinámico a la tienda usando JavaScript
@@ -163,14 +162,30 @@ js/
   catalogo.js          → catálogo, búsqueda y filtros
   producto.js          → detalle del producto y valoraciones
   carrito.js           → carrito, confirmación de compra, pedidos y stock
-```
- 
+## Roles de usuario
+- **Cliente:** puede recorrer el catálogo, comprar, ver sus pedidos y publicar
+  valoraciones. No ve el enlace de Administración y, si escribe `admin.html` en la
+  dirección, el sitio lo redirige al inicio con un aviso.
+- **Administrador:** además de lo anterior, ve el enlace "Administración" y puede
+  usar el panel para consultar, crear y editar productos.
+
+Al registrarse, todo usuario nuevo queda con el rol `cliente`, guardado en el
+documento `usuarios/{uid}`. El formulario de registro no permite elegir otro rol:
+el rol de administrador se asigna manualmente desde la consola de Firestore.
+
 ## Reglas de seguridad de Firestore
-- `productos`: lectura pública; un usuario autenticado solo puede modificar el campo
-  `stock` (nunca a un valor negativo). No se pueden crear ni borrar desde la web.
-- `pedidos`: solo se pueden crear con el `usuarioId` propio y solo los lee su dueño.
-- `valoraciones`: lectura pública; se crean solo con el `usuarioId` propio,
-  puntuación de 1 a 5 y comentario no vacío.
+El modo de prueba fue reemplazado por reglas propias. El texto completo está en el
+archivo `firestore.rules` de este repositorio. En resumen:
+
+- `usuarios`: cada persona crea y lee solo su propio documento, y el campo `rol`
+  nunca puede modificarse desde la web.
+- `productos`: lectura pública. Solo el administrador puede crear y editar
+  productos. Cualquier otro usuario con sesión únicamente puede bajar el stock al
+  comprar. No se pueden eliminar desde la web.
+- `pedidos`: cada usuario crea pedidos a su nombre y solo puede leer los suyos.
+- `valoraciones`: lectura pública. Solo se crean con el usuario autenticado como
+  autor, con puntuación de 1 a 5 y comentario no vacío.
+
 
 ## Decisiones de diseño adoptadas
 - Paleta de color basada en un azul noche (`#0F172A`) como color principal,
