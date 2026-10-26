@@ -1,0 +1,90 @@
+// Reglas de seguridad
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funciones auxiliares
+
+    // Verdadero si hay sesión y el documento del usuario dice rol "administrador".
+    function esAdmin() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'administrador';
+    }
+
+    // Datos válidos de un producto (los usa la creación y la edición del panel).
+    function productoValido(datos, productoId) {
+      return datos.keys().hasOnly(['id', 'nombre', 'descripcion', 'categoria', 'precio', 'stock', 'disponibilidad', 'imagen'])
+          && datos.id == productoId
+          && datos.nombre is string
+          && datos.nombre.size() > 0
+          && datos.categoria is string
+          && datos.categoria.size() > 0
+          && datos.precio is number
+          && datos.precio >= 0
+          && datos.stock is int
+          && datos.stock >= 0
+          && datos.disponibilidad is bool;
+    }
+
+    // Una compra solo puede bajar el stock (nunca subirlo ni dejarlo negativo)
+    // y no puede tocar ningún otro campo.
+    function soloDescuentaStock() {
+      return request.auth != null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock'])
+          && request.resource.data.stock >= 0
+          && request.resource.data.stock <= resource.data.stock;
+    }
+
+    // Usuarios
+    // Cada persona crea su propio documento y solo con rol "cliente".
+    // El administrador se asigna a mano desde la consola de Firebase.
+    match /usuarios/{uid} {
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.rol == 'cliente'
+                    && request.resource.data.keys().hasOnly(['nombre', 'email', 'rol']);
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.rol == resource.data.rol;
+      allow delete: if false;
+    }
+
+    // Productos
+    // Lectura pública. Solo el administrador crea y edita productos completos;
+    // cualquier usuario con sesión puede únicamente descontar stock al comprar.
+    match /productos/{productoId} {
+      allow read: if true;
+      allow create: if esAdmin() && productoValido(request.resource.data, productoId);
+      allow update: if (esAdmin() && productoValido(request.resource.data, productoId))
+                    || soloDescuentaStock();
+      allow delete: if false;
+    }
+
+    // Pedidos
+    // Cada usuario crea pedidos a su nombre y solo puede leer los suyos.
+    match /pedidos/{pedidoId} {
+      allow create: if request.auth != null
+                    && request.resource.data.usuarioId == request.auth.uid
+                    && request.resource.data.usuarioCorreo == request.auth.token.email;
+      allow read: if request.auth != null
+                  && resource.data.usuarioId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Valoraciones
+    // Lectura pública. Solo se crean con el usuario autenticado como autor.
+    match /valoraciones/{valoracionId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.usuarioId == request.auth.uid
+                    && request.resource.data.usuarioCorreo == request.auth.token.email
+                    && request.resource.data.puntuacion >= 1
+                    && request.resource.data.puntuacion <= 5
+                    && request.resource.data.comentario is string
+                    && request.resource.data.comentario.size() > 0;
+      allow update, delete: if false;
+    }
+  }
+}
