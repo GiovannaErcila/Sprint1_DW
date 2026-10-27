@@ -21,7 +21,7 @@ onAuthStateChanged(auth, (usuario) => {
   usuarioActual = usuario;
 });
 
-// Persistencia en LocalStorage.
+// --- Persistencia en LocalStorage --------------------------------------
 
 export function obtenerCarrito() {
   const datos = localStorage.getItem(CLAVE_CARRITO);
@@ -55,7 +55,7 @@ export function establecerProductosCarrito(productos) {
   productosCache = productos;
 }
 
-// Operaciones sobre el carrito.
+// --- Operaciones sobre el carrito ---------------------------------------
 
 export function agregarAlCarrito(idProducto, cantidad = 1) {
   const carrito = obtenerCarrito();
@@ -113,7 +113,7 @@ export function eliminarDelCarrito(idProducto) {
   renderizarCarrito();
 }
 
-// Render (Solo ejecuta en carrito.html) 
+// --- Render (Solo ejecuta en carrito.html) --------------------------------
 
 const contenedorCarrito = document.getElementById("carrito-items");
 const mensajeCarritoVacio = document.getElementById("carrito-vacio");
@@ -145,17 +145,23 @@ export async function renderizarCarrito() {
     total += subtotal;
 
     const fila = document.createElement("div");
-    fila.classList.add("row", "align-items-center", "border-bottom", "py-2");
+    // En pantallas chicas la fila se apila (nombre / precio y cantidad /
+    // subtotal y eliminar); desde "md" vuelve a ser una sola línea.
+    fila.classList.add("row", "align-items-center", "border-bottom", "py-3", "g-2");
     fila.innerHTML = `
-      <div class="col-4">${producto.nombre}</div>
-      <div class="col-2">$${producto.precio.toLocaleString("es-UY")}</div>
-      <div class="col-3 d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary" data-accion="restar">-</button>
-        <span>${item.cantidad}</span>
-        <button class="btn btn-sm btn-outline-secondary" data-accion="sumar">+</button>
+      <div class="col-12 col-md-4 fw-semibold text-break">${producto.nombre}</div>
+      <div class="col-6 col-md-2">
+        <span class="d-md-none text-muted small">Precio: </span>$${producto.precio.toLocaleString("es-UY")}
       </div>
-      <div class="col-2">$${subtotal.toLocaleString("es-UY")}</div>
-      <div class="col-1">
+      <div class="col-6 col-md-3 d-flex align-items-center gap-2 justify-content-end justify-content-md-start">
+        <button class="btn btn-sm btn-outline-secondary px-3" data-accion="restar" aria-label="Quitar una unidad">-</button>
+        <span>${item.cantidad}</span>
+        <button class="btn btn-sm btn-outline-secondary px-3" data-accion="sumar" aria-label="Agregar una unidad">+</button>
+      </div>
+      <div class="col-6 col-md-2">
+        <span class="d-md-none text-muted small">Subtotal: </span>$${subtotal.toLocaleString("es-UY")}
+      </div>
+      <div class="col-6 col-md-1 text-end">
         <button class="btn btn-sm btn-danger" data-accion="eliminar" aria-label="Eliminar producto">
           <i class="bi bi-trash"></i>
         </button>
@@ -180,9 +186,10 @@ export async function renderizarCarrito() {
   }
 }
 
-// Confirmar compra: valida sesión y stock real en Firestore
+// --- Confirmar compra: valida sesión y stock real en Firestore -----
 
-// Consulta Firestore DE NUEVO para cada producto del carrito.
+// Consulta Firestore DE NUEVO para cada producto del carrito (no confía en
+// productosCache, que pudo quedar desactualizado desde que se agregó).
 async function verificarStockActual(carrito) {
   const problemas = [];
 
@@ -222,7 +229,7 @@ async function verificarStockActual(carrito) {
 }
 
 // Si algún producto ya no tiene el stock que el carrito suponía, ajusta las
-// cantidades (o lo elimina si quedó en 0) para que el carrito sea honesto.
+// cantidades (o lo elimina si quedó en 0).
 function ajustarCarritoAStockReal(problemas) {
   let carrito = obtenerCarrito();
 
@@ -238,7 +245,7 @@ function ajustarCarritoAStockReal(problemas) {
   guardarCarrito(carrito);
 }
 
-// Registrar el pedido y descontar stock, todo junto.
+// --- Registrar el pedido y descontar stock, todo junto -----------
 // Usamos una transacción: primero lee el stock real de cada producto, valida
 // que alcance, y recién ahí escribe el pedido y descuenta el stock. Si algo
 // falla en el medio, Firestore no aplica ninguno de los cambios.
@@ -356,6 +363,7 @@ if (btnConfirmarCompra) {
   });
 }
 
+// --- Inicialización automática al cargar el script -----------------------
 
 actualizarBadgeCarrito();
 

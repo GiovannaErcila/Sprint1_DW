@@ -19,7 +19,7 @@ const mensajeError = document.getElementById("error-producto");
 const contenedorDetalle = document.getElementById("detalle-producto");
 const mensajeNoEncontrado = document.getElementById("producto-no-encontrado");
 
-// Elementos del DOM — valoraciones (Día 11)
+// Elementos del DOM — valoraciones 
 const seccionValoraciones = document.getElementById("seccion-valoraciones");
 const formValoracionWrapper = document.getElementById("form-valoracion-wrapper");
 const formValoracion = document.getElementById("form-valoracion");
@@ -72,7 +72,7 @@ function renderizarDetalleProducto(producto) {
         <h3 class="fw-bold text-primary mb-3">$${producto.precio.toLocaleString("es-UY")}</h3>
         <p class="mb-4"><small class="${comprable ? "text-muted" : "text-danger"}">${textoStock}</small></p>
 
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex flex-wrap align-items-center gap-3">
           <button id="btn-agregar-detalle" class="btn btn-bn-primary btn-lg" ${comprable ? "" : "disabled"}>
             <i class="bi bi-cart-plus me-1"></i> ${comprable ? "Agregar al carrito" : "No disponible"}
           </button>
@@ -99,7 +99,7 @@ function renderizarDetalleProducto(producto) {
     }
   });
 
-  // Valoraciones.
+  // --- Valoraciones ---
   productoActual = producto;
   seccionValoraciones.classList.remove("d-none");
   actualizarVistaFormularioValoracion();
@@ -111,7 +111,7 @@ function mostrarNoEncontrado() {
   mensajeNoEncontrado.classList.remove("d-none");
 }
 
-// Valoraciones y comentarios.
+// --- Valoraciones y comentarios ----------------------------------
 
 function actualizarVistaFormularioValoracion() {
   if (usuarioActual) {
@@ -215,7 +215,7 @@ formValoracion.addEventListener("submit", async (evento) => {
   }
 });
 
-// Carga inicial del producto.
+// --- Carga inicial del producto -------------------------------------------
 
 async function cargarProducto() {
   const idProducto = obtenerIdDesdeUrl();

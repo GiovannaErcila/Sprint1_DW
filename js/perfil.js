@@ -32,6 +32,7 @@ const pedidosCargando = document.getElementById("pedidos-cargando");
 const pedidosVacio = document.getElementById("pedidos-vacio");
 const listaPedidos = document.getElementById("lista-pedidos");
 
+// --- Utilidades compartidas --------------------------------------------
 
 function mostrarMensaje(elemento, texto, tipo) {
   elemento.textContent = texto;
@@ -65,6 +66,8 @@ function mostrarFormularios() {
   panelSesion.classList.add("d-none");
 }
 
+// --- Mis pedidos: solo los del usuario autenticado, filtrando por uid ---
+
 async function cargarPedidosUsuario(uid) {
   pedidosCargando.classList.remove("d-none");
   pedidosVacio.classList.add("d-none");
@@ -97,8 +100,8 @@ async function cargarPedidosUsuario(uid) {
       tarjeta.classList.add("card", "mb-3");
       tarjeta.innerHTML = `
         <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <h3 class="h6 mb-1">Pedido ${docSnap.id}</h3>
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <h3 class="h6 mb-1 text-break">Pedido ${docSnap.id}</h3>
             <span class="badge bg-success-subtle text-success">${pedido.estado || "confirmado"}</span>
           </div>
           <p class="small text-muted mb-2">${fecha}</p>
@@ -115,6 +118,7 @@ async function cargarPedidosUsuario(uid) {
   }
 }
 
+// --- Mantener la vista sincronizada con el estado real de la sesión -----
 
 onAuthStateChanged(auth, (usuario) => {
   if (usuario) {
@@ -125,6 +129,7 @@ onAuthStateChanged(auth, (usuario) => {
   }
 });
 
+// --- Registro ---------------------------------------------------
 
 function validarRegistro(nombre, correo, contrasena) {
   if (!nombre || !correo || !contrasena) {
@@ -162,7 +167,8 @@ formRegistro.addEventListener("submit", async (evento) => {
   try {
     const credencial = await createUserWithEmailAndPassword(auth, correo, contrasena);
 
-
+    // Todo usuario nuevo se registra con rol "cliente". El rol no se
+    // elige en el formulario; el administrador se asigna a mano en Firestore.
     await setDoc(doc(db, "usuarios", credencial.user.uid), {
       nombre,
       email: credencial.user.email,
@@ -178,6 +184,9 @@ formRegistro.addEventListener("submit", async (evento) => {
   }
 });
 
+// --- Inicio y cierre de sesión  -----------------------------------
+// Ya no necesitan cambiar la vista manualmente: onAuthStateChanged (arriba)
+// se encarga apenas Firebase confirma el login o logout.
 
 formLogin.addEventListener("submit", async (evento) => {
   evento.preventDefault();
